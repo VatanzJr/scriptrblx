@@ -6035,20 +6035,27 @@ TestTab:AddToggle({
 })
 
 TestTab:AddToggle({
-    Name = "Collect Stars",
+    Name = "Auto Collect Stars",
     Value = _G.AutoFarm,
     Callback = function(value)
         _G.AutoFarm = value
         while _G.AutoFarm do
-            wait()
+            task.wait()
             pcall(function()
-                local player = game.Players.LocalPlayer
-                local character = player.Character or player.CharacterAdded:Wait()
-                local hrp = character:WaitForChild("HumanoidRootPart")
+                local StarsFolder = game:GetService("Workspace").Stars
+                local CollectRemote = game:GetService("ReplicatedStorage").Remote.Star.Server.Collect
                 
-                for _, star in ipairs(game.Workspace.Stars:GetChildren()) do
-                    if star:IsA("Model") and star:FindFirstChild("Root") then
-                        star.Root.CFrame = hrp.CFrame
+                -- Iterate through all star models
+                for _, starModel in ipairs(StarsFolder:GetChildren()) do
+                    if starModel:IsA("Model") and starModel:FindFirstChild("Root") then
+                        -- Use the model's name as the UUID
+                        local starID = starModel.Name
+                        
+                        -- Fire the collect remote
+                        CollectRemote:FireServer(starID)
+                        
+                        -- Prevent server-side rate limits
+                        task.wait(0.25)
                     end
                 end
             end)
