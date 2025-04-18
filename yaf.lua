@@ -6022,7 +6022,7 @@ TestTab:AddToggle({
 			while _G.Loop do
 				for _, model in ipairs(starsFolder) do
 					if model:IsA("Model") then
-						local part = model:FindFirstChildWhichIsA("BasePart")
+						local part = model:FindFirstChildWhichIsA("MeshPart")
 						if part then
 							gamed.CFrame = CFrame.new(part.Position)
 						end
