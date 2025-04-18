@@ -6035,6 +6035,38 @@ TestTab:AddToggle({
 })
 
 TestTab:AddToggle({
+    Name = "Auto Throw Energy",
+    Value = _G.AutoThrow,
+    Callback = function(value)
+        _G.AutoThrow = value
+        
+        while _G.AutoThrow do
+            task.wait()
+            pcall(function()
+                -- Get required services
+                local Players = game:GetService("Players")
+                local ReplicatedStorage = game:GetService("ReplicatedStorage")
+                
+                -- Get remotes
+                local LandedRemote = ReplicatedStorage.Remote.Throw.Server.Landed
+                local ClientRemote = Players.Vatanzjr3.PlayerScripts.Client.Throwing.Dummythrown
+                
+                -- Generate parameters based on observed pattern
+                local timestamp = os.clock() * 1e6  -- Creates large numeric value
+                local secondaryParam = 0
+                
+                -- Fire both client and server remotes
+                ClientRemote:Invoke(timestamp, secondaryParam)
+                LandedRemote:FireServer(timestamp, secondaryParam)
+                
+                -- Optional: Add randomized delay
+                task.wait(math.random(1, 5)) -- 0.05-0.15s delay
+            end)
+        end
+    end
+})
+
+TestTab:AddToggle({
     Name = "Instant Collect Stars",
     Value = _G.AutoFarm,
     Callback = function(value)
