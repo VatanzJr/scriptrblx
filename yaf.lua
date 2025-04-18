@@ -6033,6 +6033,66 @@ TestTab:AddToggle({
 		end
 	end
 })
+TestTab:AddToggle({
+    Name = "Collect Stars (MeshPart Fix)",
+    Value = _G.AutoFarm,
+    Callback = function(value)
+        _G.AutoFarm = value
+        
+        local function collectMeshStars()
+            while _G.AutoFarm do
+                task.wait(0.1)  -- Reduced update frequency
+                pcall(function()
+                    local player = game.Players.LocalPlayer
+                    local character = player.Character
+                    if not character then return end
+                    
+                    local hrp = character:FindFirstChild("HumanoidRootPart")
+                    if not hrp then return end
+                    
+                    -- MeshPart-specific collection logic
+                    for _, star in ipairs(game.Workspace.Stars:GetChildren()) do
+                        if star:IsA("Model") then
+                            local meshPart = star:FindFirstChildWhichIsA("MeshPart")
+                            if meshPart and meshPart:IsA("MeshPart") then
+                                
+                                -- Check for potential anti-cheat measures
+                                if meshPart:GetAttribute("ClientInteract") then
+                                    fireclickdetector(meshPart:FindFirstChildWhichIsA("ClickDetector"), 0)
+                                else
+                                    -- Improved position calculation
+                                    local offsetPosition = hrp.CFrame:PointToWorldSpace(
+                                        Vector3.new(0, 0, -5) -- Increased z-offset
+                                    )
+                                    
+                                    -- Smooth movement using CFrame.lookAt
+                                    meshPart.CFrame = CFrame.lookAt(
+                                        meshPart.Position,
+                                        offsetPosition
+                                    ).Position + (offsetPosition - meshPart.Position).Unit * 2
+                                    
+                                    -- Force network ownership
+                                    if meshPart:CanSetNetworkOwnership() then
+                                        meshPart:SetNetworkOwner(player)
+                                    end
+                                    
+                                    -- Double touch verification
+                                    firetouchinterest(hrp, meshPart, 1)
+                                    task.wait()
+                                    firetouchinterest(hrp, meshPart, 0)
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
+        end
+        
+        if _G.AutoFarm then
+            task.spawn(collectMeshStars)
+        end
+    end
+})
 
 TestTab:AddToggle({
 	Name = "Collect Stars",
