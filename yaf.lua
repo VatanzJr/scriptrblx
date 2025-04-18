@@ -6035,6 +6035,59 @@ TestTab:AddToggle({
 })
 
 TestTab:AddToggle({
+    Name = "Instant Star Collector",
+    Value = _G.AutoFarm,
+    Callback = function(value)
+        _G.AutoFarm = value
+        
+        -- Main collection system
+        local function HyperCollect()
+            pcall(function()
+                -- Cache critical references
+                local StarsFolder = workspace.Stars
+                local CollectRemote = ReplicatedStorage.Remote.Star.Server.Collect
+                
+                -- Parallel collection of all stars
+                task.defer(function()
+                    for _, star in ipairs(StarsFolder:GetChildren()) do
+                        if star:IsA("Model") and star:FindFirstChild("Root") then
+                            -- Fire without any delays
+                            task.spawn(function()
+                                CollectRemote:FireServer(star.Name)
+                            end)
+                        end
+                    end
+                end)
+            end)
+        end
+
+        -- Instant response system for new stars
+        local connection
+        if _G.AutoFarm then
+            connection = workspace.Stars.ChildAdded:Connect(function(star)
+                if star:IsA("Model") and star:FindFirstChild("Root") then
+                    task.spawn(function()
+                        ReplicatedStorage.Remote.Star.Server.Collect:FireServer(star.Name)
+                    end)
+                end
+            end)
+        end
+
+        -- Ultra-fast collection loop
+        while _G.AutoFarm do
+            HyperCollect()
+            -- Yield minimally using frame-delay instead of timed wait
+            task.wait()
+        end
+        
+        -- Cleanup connection when toggled off
+        if connection then
+            connection:Disconnect()
+        end
+    end
+})
+
+TestTab:AddToggle({
     Name = "Fastv2 Collect Stars",
     Value = _G.AutoFarm,
     Callback = function(value)
