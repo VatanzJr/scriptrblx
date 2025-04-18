@@ -6035,52 +6035,82 @@ TestTab:AddToggle({
 })
 
 TestTab:AddToggle({
-    Name = "Instant Star Collector",
+    Name = "Instant Collect Stars",
     Value = _G.AutoFarm,
     Callback = function(value)
         _G.AutoFarm = value
         
-        -- Main collection system
-        local function HyperCollect()
-            pcall(function()
-                -- Cache critical references
-                local StarsFolder = workspace.Stars
-                local CollectRemote = ReplicatedStorage.Remote.Star.Server.Collect
-                
-                -- Parallel collection of all stars
-                task.defer(function()
-                    for _, star in ipairs(StarsFolder:GetChildren()) do
-                        if star:IsA("Model") and star:FindFirstChild("Root") then
-                            -- Fire without any delays
-                            task.spawn(function()
-                                CollectRemote:FireServer(star.Name)
-                            end)
-                        end
-                    end
+        -- Main collection function
+        local function CollectStar(starModel)
+            if starModel:IsA("Model") and starModel:FindFirstChild("Root") then
+                pcall(function()
+                    game:GetService("ReplicatedStorage").Remote.Star.Server.Collect:FireServer(starModel.Name)
                 end)
-            end)
+            end
         end
 
-        -- Instant response system for new stars
+        -- Connect to ChildAdded event for instant detection
         local connection
         if _G.AutoFarm then
-            connection = workspace.Stars.ChildAdded:Connect(function(star)
-                if star:IsA("Model") and star:FindFirstChild("Root") then
-                    task.spawn(function()
-                        ReplicatedStorage.Remote.Star.Server.Collect:FireServer(star.Name)
-                    end)
+            connection = game.Workspace.Stars.ChildAdded:Connect(CollectStar)
+        end
+
+        -- Fast polling loop as backup
+        while _G.AutoFarm do
+            task.wait()
+            pcall(function()
+                for _, star in ipairs(game.Workspace.Stars:GetChildren()) do
+                    CollectStar(star)
+                end
+            end)
+            task.wait(0.1) -- Minimal backup delay
+        end
+
+        -- Cleanup
+        if connection then
+            connection:Disconnect()
+        end
+    end
+})
+
+TestTab:AddToggle({
+    Name = "Teleport Stars to Me",
+    Value = _G.AutoFarm,
+    Callback = function(value)
+        _G.AutoFarm = value
+        
+        local function MoveStars()
+            pcall(function()
+                local plr = game.Players.LocalPlayer
+                local char = plr.Character
+                local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                
+                if hrp then
+                    for _, star in ipairs(game.Workspace.Stars:GetChildren()) do
+                        if star:IsA("Model") and star:FindFirstChild("Root") then
+                            -- Move star to player position
+                            star.Root.CFrame = hrp.CFrame
+                            -- Instant collect after positioning
+                            game:GetService("ReplicatedStorage").Remote.Star.Server.Collect:FireServer(star.Name)
+                        end
+                    end
                 end
             end)
         end
 
-        -- Ultra-fast collection loop
-        while _G.AutoFarm do
-            HyperCollect()
-            -- Yield minimally using frame-delay instead of timed wait
-            task.wait()
+        -- Use both methods for maximum efficiency
+        local connection
+        if _G.AutoFarm then
+            connection = game.Workspace.Stars.ChildAdded:Connect(function(star)
+                MoveStars()
+            end)
         end
-        
-        -- Cleanup connection when toggled off
+
+        while _G.AutoFarm do
+            MoveStars()
+            task.wait(0.05) -- Aggressive polling
+        end
+
         if connection then
             connection:Disconnect()
         end
