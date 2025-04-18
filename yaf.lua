@@ -6040,24 +6040,15 @@ TestTab:AddToggle({
     Callback = function(value)
         _G.AutoFarm = value
         while _G.AutoFarm do
-            task.wait()
+            wait()
             pcall(function()
-                -- Loop through all stars in Workspace.Stars
-                for _, star in pairs(game:GetService("Workspace").Stars:GetChildren()) do
-                    if star:IsA("Model") then
-                        -- Get the GUID (assumed to be the star's Name)
-                        local starGuid = star.Name
-                        
-                        -- Fire the RemoteEvent with the GUID
-                        game:GetService("ReplicatedStorage")
-                            :WaitForChild("Remote")
-                            :WaitForChild("Star")
-                            :WaitForChild("Server")
-                            :WaitForChild("Collect")
-                            :FireServer(starGuid)
-                        
-                        -- Add delay to avoid spamming
-                        task.wait(0.2)
+                local player = game.Players.LocalPlayer
+                local character = player.Character or player.CharacterAdded:Wait()
+                local hrp = character:WaitForChild("HumanoidRootPart")
+                
+                for _, star in ipairs(game.Workspace.Stars:GetChildren()) do
+                    if star:IsA("Model") and star:FindFirstChild("Root") then
+                        star.Root.CFrame = hrp.CFrame
                     end
                 end
             end)
