@@ -6033,6 +6033,43 @@ TestTab:AddToggle({
 		end
 	end
 })
+
+TestTab:AddToggle({
+    Name = "Instant Star Collector",
+    Value = _G.InstantCollect,
+    Callback = function(value)
+        _G.InstantCollect = value
+        
+        local function instantPull()
+            while _G.InstantCollect do
+                task.wait()
+                pcall(function()
+                    local hrp = game.Players.LocalPlayer.Character.HumanoidRootPart
+                    for _, star in ipairs(game.Workspace.Stars:GetChildren()) do
+                        if star:IsA("Model") then
+                            local part = star:FindFirstChildWhichIsA("BasePart")
+                            if part then
+                                -- Direct position override
+                                part.CFrame = hrp.CFrame
+                                -- Force server sync
+                                part:SetNetworkOwner(nil)
+                                -- Immediate collection trigger
+                                firetouchinterest(part, hrp, 1)
+                                task.wait()
+                                firetouchinterest(part, hrp, 0)
+                            end
+                        end
+                    end
+                end)
+            end
+        end
+        
+        if _G.InstantCollect then
+            task.spawn(instantPull)
+        end
+    end
+})
+
 TestTab:AddToggle({
     Name = "Collect Stars (MeshPart Fix)",
     Value = _G.AutoFarm,
