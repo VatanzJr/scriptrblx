@@ -6035,20 +6035,34 @@ TestTab:AddToggle({
 })
 
 TestTab:AddToggle({
-	Name = "Collect Stars",
-	Value = _G.AutoFarm,
-	Callback = function(value)
-		_G.AutoFarm = value
-while _G.AutoFarm do wait()
-	pcall(function()
-for i,v in pairs(game:GetService("Workspace").Stars:GetDescendants()) do
-	if v.ClassName == "Model" then
-	 v.Root.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
-			end
-		end
-	end)
-end
-	end
+    Name = "Collect Stars",
+    Value = _G.AutoFarm,
+    Callback = function(value)
+        _G.AutoFarm = value
+        while _G.AutoFarm do
+            task.wait()
+            pcall(function()
+                -- Loop through all stars in Workspace.Stars
+                for _, star in pairs(game:GetService("Workspace").Stars:GetChildren()) do
+                    if star:IsA("Model") then
+                        -- Get the GUID (assumed to be the star's Name)
+                        local starGuid = star.Name
+                        
+                        -- Fire the RemoteEvent with the GUID
+                        game:GetService("ReplicatedStorage")
+                            :WaitForChild("Remote")
+                            :WaitForChild("Star")
+                            :WaitForChild("Server")
+                            :WaitForChild("Collect")
+                            :FireServer(starGuid)
+                        
+                        -- Add delay to avoid spamming
+                        task.wait(0.2)
+                    end
+                end
+            end)
+        end
+    end
 })
 
 local UserInputService = game:GetService("UserInputService")
