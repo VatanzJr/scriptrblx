@@ -6035,6 +6035,92 @@ TestTab:AddToggle({
 })
 
 TestTab:AddToggle({
+    Name = "Fastv2 Collect Stars",
+    Value = _G.AutoFarm,
+    Callback = function(value)
+        _G.AutoFarm = value
+        
+        -- Use a debounce flag for controlled execution
+        local processing = false
+        
+        local function CollectStarsFast()
+            if processing then return end
+            processing = true
+            
+            pcall(function()
+                local StarsFolder = game:GetService("Workspace").Stars
+                local CollectRemote = game:GetService("ReplicatedStorage").Remote.Star.Server.Collect
+                local stars = StarsFolder:GetChildren()
+                
+                -- Process stars in parallel using coroutines
+                local connections = {}
+                
+                for _, starModel in ipairs(stars) do
+		    task.spawn(function()
+		        CollectRemote:FireServer(starModel.Name)
+		    end)
+		end
+            end)
+            
+            processing = false
+        end
+
+        -- Fast loop with controlled execution rate
+        while _G.AutoFarm do
+            CollectStarsFast()
+            -- Adjust this wait time based on star respawn rate
+            task.wait(0.25) -- Checks for new stars 4 times/second
+        end
+    end
+})
+
+TestTab:AddToggle({
+    Name = "Fast Collect Stars",
+    Value = _G.AutoFarm,
+    Callback = function(value)
+        _G.AutoFarm = value
+        
+        -- Use a debounce flag for controlled execution
+        local processing = false
+        
+        local function CollectStarsFast()
+            if processing then return end
+            processing = true
+            
+            pcall(function()
+                local StarsFolder = game:GetService("Workspace").Stars
+                local CollectRemote = game:GetService("ReplicatedStorage").Remote.Star.Server.Collect
+                local stars = StarsFolder:GetChildren()
+                
+                -- Process stars in parallel using coroutines
+                local connections = {}
+                
+                for _, starModel in ipairs(stars) do
+                    if starModel:IsA("Model") and starModel:FindFirstChild("Root") then
+                        task.spawn(function()
+                            -- Fire immediately without position checks
+                            CollectRemote:FireServer(starModel.Name)
+                            
+                            -- Optional: Add minimal delay between spawns
+                            task.wait(0.02) -- 20ms between coroutine starts
+                        end)
+                    end
+                end
+            end)
+            
+            processing = false
+        end
+
+        -- Fast loop with controlled execution rate
+        while _G.AutoFarm do
+            CollectStarsFast()
+            -- Adjust this wait time based on star respawn rate
+            task.wait(0.25) -- Checks for new stars 4 times/second
+        end
+    end
+})
+
+TestTab:AddToggle({
     Name = "Auto Collect Stars",
     Value = _G.AutoFarm,
     Callback = function(value)
