@@ -6037,48 +6037,37 @@ TestTab:AddToggle({
 
 
 TestTab:AddToggle({
-    Name = "Smart Throw",
-    Value = _G.AutoThrow,
+    Name = "Direct Throw",
+    Value = _G.InstantThrow,
     Callback = function(value)
-        _G.AutoThrow = value
+        _G.InstantThrow = value
         
-        -- Initialize position tracker
-        local lastValidPosition = nil
-        
-        -- Phase 1: Initial Request
-        local function SendInitialRequest()
-            game:GetService("ReplicatedStorage").Remote.Throw.Server.Request:FireServer()
-        end
-        
-        -- Phase 2: Capture Final Position
-        local function CapturePosition()
-            lastValidPosition = {
-                Vector2int16.new(9, 3),
-                Vector3int16.new(17356, -30161, -32108)
+        -- Final position data
+        local finalArgs = {
+            {
+                Vector2int16.new(3, 4),          -- Grid position
+                Vector3int16.new(-8923, -31994, -32106)  -- Final coordinates
             }
-        end
-        
-        -- Phase 3: Execute Final Sequence
-        local function CompleteThrow()
-            -- Send final position once
-            game:GetService("ReplicatedStorage").Remote.Race.Server.RequestPositionUpdate:FireServer({lastValidPosition})
-            
-            -- Generate dynamic landing parameter
-            local landingParam = math.random(9e6, 1e7) + os.clock()
-            
-            -- Trigger landing
-            game:GetService("ReplicatedStorage").Remote.Throw.Server.Landed:InvokeServer(landingParam, 0)
-        end
+        }
 
-        while _G.AutoThrow do
-            task.wait(0.25)
+        -- Landed parameters (dynamic generation)
+        local landingID = math.random(9e6, 1e7) + os.clock()
+
+        while _G.InstantThrow do
+            task.wait()
             pcall(function()
-                SendInitialRequest()
-                CapturePosition() -- Update position before completion
-                CompleteThrow()
+                -- Step 1: Send final position once
+                game:GetService("ReplicatedStorage").Remote.Race.Server.RequestPositionUpdate:FireServer(finalArgs)
                 
-                -- Add randomized delay between throws
-                task.wait(math.random(5, 15)/10)
+                -- Step 2: Immediate landing with unique ID
+                game:GetService("ReplicatedStorage").Remote.Throw.Server.Landed:InvokeServer(
+                    landingID + math.random(),  -- Add randomness to ID
+                    0
+                )
+                
+                -- Reset ID periodically
+                landingID = math.random(9e6, 1e7) + os.clock()
+                task.wait(0.25)  -- Cooldown between throws
             end)
         end
     end
