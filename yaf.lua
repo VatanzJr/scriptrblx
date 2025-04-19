@@ -6065,7 +6065,7 @@ TestTab:AddToggle({
                 game:GetService("ReplicatedStorage").Remote.Race.Server.RequestPositionUpdate:FireServer({FINAL_POSITION})
                 
                 -- 3. Generate unique landed ID
-                local landedID = math.random(9e12, 9e15) + os.clock()
+                local landedID = math.random(9e6, 1e7) + os.clock()
                 
                 -- 4. Collect energy
                 game:GetService("ReplicatedStorage").Remote.Throw.Server.Landed:InvokeServer(landedID, 0)
