@@ -6064,7 +6064,7 @@ TestTab:AddToggle({
                 -- 4. CRUCIAL FIX: Use observed successful parameter
                 game:GetService("ReplicatedStorage").Remote.Throw.Server.Landed:InvokeServer(
                     landedID, 
-                    5.425 -- Changed from 0 to observed working value
+                    100 -- Changed from 0 to observed working value
                 )
             end)
         end
