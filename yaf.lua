@@ -6037,37 +6037,38 @@ TestTab:AddToggle({
 
 
 TestTab:AddToggle({
-    Name = "Direct Throw",
-    Value = _G.InstantThrow,
+    Name = "Instant Energy Loop",
+    Value = _G.InstantEnergy,
     Callback = function(value)
-        _G.InstantThrow = value
+        _G.InstantEnergy = value
         
-        -- Final position data
-        local finalArgs = {
-            {
-                Vector2int16.new(3, 4),          -- Grid position
-                Vector3int16.new(-8923, -31994, -32106)  -- Final coordinates
-            }
+        -- Preconfigured final position (modify these coordinates)
+        local FINAL_POSITION = {
+            Vector2int16.new(3, 4),
+            Vector3int16.new(-8923, -31994, -32106)
         }
 
-        -- Landed parameters (dynamic generation)
-        local landingID = math.random(9e6, 1e7) + os.clock()
-
-        while _G.InstantThrow do
-            task.wait()
+        --[[ 
+        Sequence Flow:
+        1. Initial Request (starts throw)
+        2. Single Final Position Update
+        3. Landed Event (energy gain)
+        ]]--
+        while _G.InstantEnergy do
+            task.wait(0.25) -- Adjust delay based on cooldown
+            
             pcall(function()
-                -- Step 1: Send final position once
-                game:GetService("ReplicatedStorage").Remote.Race.Server.RequestPositionUpdate:FireServer(finalArgs)
+                -- 1. Trigger initial throw
+                game:GetService("ReplicatedStorage").Remote.Throw.Server.Request:FireServer()
                 
-                -- Step 2: Immediate landing with unique ID
-                game:GetService("ReplicatedStorage").Remote.Throw.Server.Landed:InvokeServer(
-                    landingID + math.random(),  -- Add randomness to ID
-                    0
-                )
+                -- 2. Immediately send final position
+                game:GetService("ReplicatedStorage").Remote.Race.Server.RequestPositionUpdate:FireServer({FINAL_POSITION})
                 
-                -- Reset ID periodically
-                landingID = math.random(9e6, 1e7) + os.clock()
-                task.wait(0.25)  -- Cooldown between throws
+                -- 3. Generate unique landed ID
+                local landedID = math.random(9e6, 1e7) + os.clock()
+                
+                -- 4. Collect energy
+                game:GetService("ReplicatedStorage").Remote.Throw.Server.Landed:InvokeServer(landedID, 0)
             end)
         end
     end
