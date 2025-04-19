@@ -6037,63 +6037,39 @@ TestTab:AddToggle({
 
 
 TestTab:AddToggle({
-    Name = "Energy Farm V3",
-    Value = _G.EnergyFarm,
+    Name = "Instant Energy Loop",
+    Value = _G.InstantEnergy,
     Callback = function(value)
-        _G.EnergyFarm = value
+        _G.InstantEnergy = value
         
-        local function debug(msg)
-            print("[Energy Debug] " .. msg)
-        end
+        -- Preconfigured final position (modify these coordinates)
+        local FINAL_POSITION = {
+            Vector2int16.new(3, 4),
+            Vector3int16.new(-8923, -31994, -32106)
+        }
 
-        while _G.EnergyFarm do
-            task.wait(0.5) -- Base delay
+        --[[ 
+        Sequence Flow:
+        1. Initial Request (starts throw)
+        2. Single Final Position Update
+        3. Landed Event (energy gain)
+        ]]--
+        while _G.InstantEnergy do
+            task.wait(0.25) -- Adjust delay based on cooldown
             
-            local success, err = pcall(function()
-                -- ====== 1. Verify Remotes ======
-                local RaceRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remote")
-                    :WaitForChild("Race")
-                    :WaitForChild("Server")
-                    :WaitForChild("RequestPositionUpdate")
-
-                local ThrowRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remote")
-                    :WaitForChild("Throw")
-                    :WaitForChild("Server")
-                    :WaitForChild("Landed")
-
-                -- ====== 2. Generate Valid Parameters ======
-                -- Dynamic projectile ID (matches observed pattern)
-                local projectileID = math.floor(os.clock() * 1e6) + math.random(1,9999)
+            pcall(function()
+                -- 1. Trigger initial throw
+                game:GetService("ReplicatedStorage").Remote.Throw.Server.Request:FireServer()
                 
-                -- Physics validation number (5.425 format)
-                local physicsValue = math.random(3,6) + (math.random(425,975)/1000)
-
-                -- Final position coordinates
-                local finalPosition = {
-                    Vector2int16.new(0, 7),
-                    Vector3int16.new(
-                        math.random(10830,10850),  -- X variation
-                        -31994,                    -- Consistent Y
-                        math.random(-32115,-32100)  -- Z variation
-                    )
-                }
-
-                -- ====== 3. Execute Sequence ======
-                debug("Sending position update...")
-                RaceRemote:FireServer({finalPosition})
-
-                debug("Triggering landing...")
-                local result = ThrowRemote:InvokeServer(
-                    projectileID,
-                    physicsValue
-                )
+                -- 2. Immediately send final position
+                game:GetService("ReplicatedStorage").Remote.Race.Server.RequestPositionUpdate:FireServer({FINAL_POSITION})
                 
-                debug("Server response: " .. tostring(result))
+                -- 3. Generate unique landed ID
+                local landedID = math.random(9e12, 9e15) + os.clock()
+                
+                -- 4. Collect energy
+                game:GetService("ReplicatedStorage").Remote.Throw.Server.Landed:InvokeServer(landedID, 0)
             end)
-
-            if not success then
-                debug("ERROR: " .. tostring(err))
-            end
         end
     end
 })
