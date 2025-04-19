@@ -6059,7 +6059,7 @@ TestTab:AddToggle({
                 game:GetService("ReplicatedStorage").Remote.Race.Server.RequestPositionUpdate:FireServer({FINAL_POSITION})
                 
                 -- 3. PROPER ID GENERATION (original working format)
-                local landedID = math.random(9e6, 1e7) + os.clock() -- Original valid range
+                local landedID = math.random(9e8, 1e9) + os.clock() -- Original valid range
                 
                 -- 4. CRUCIAL FIX: Use observed successful parameter
                 game:GetService("ReplicatedStorage").Remote.Throw.Server.Landed:InvokeServer(
