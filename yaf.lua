@@ -6045,7 +6045,7 @@ TestTab:AddToggle({
         -- Preconfigured final position (modify these coordinates)
         local FINAL_POSITION = {
             Vector2int16.new(0, 7),
-            Vector3int16.new(-8923, -31994, -32106)
+            Vector3int16.new(10841, -31994, -32109)
         }
 
         --[[ 
