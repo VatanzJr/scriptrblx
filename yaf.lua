@@ -6037,42 +6037,40 @@ TestTab:AddToggle({
 
 
 TestTab:AddToggle({
-    Name = "Instant Energy Loop",
-    Value = _G.InstantEnergy,
+    Name = "Energy Loop (Fixed)",
+    Value = _G.EnergyLoop,
     Callback = function(value)
-        _G.InstantEnergy = value
+        _G.EnergyLoop = value
         
-        -- Preconfigured final position (modify these coordinates)
+        -- Configured parameters
         local FINAL_POSITION = {
             Vector2int16.new(3, 4),
             Vector3int16.new(-8923, -31994, -32106)
         }
 
-        --[[ 
-        Sequence Flow:
-        1. Initial Request (starts throw)
-        2. Single Final Position Update
-        3. Landed Event (energy gain)
-        ]]--
-        while _G.InstantEnergy do
-            task.wait(0.25) -- Adjust delay based on cooldown
+        while _G.EnergyLoop do
+            task.wait(0.25) -- Maintain original delay
             
             pcall(function()
-                -- 1. Trigger initial throw
+                -- 1. Initial throw request
                 game:GetService("ReplicatedStorage").Remote.Throw.Server.Request:FireServer()
                 
-                -- 2. Immediately send final position
+                -- 2. Final position update
                 game:GetService("ReplicatedStorage").Remote.Race.Server.RequestPositionUpdate:FireServer({FINAL_POSITION})
                 
-                -- 3. Generate unique landed ID
-                local landedID = math.random(9e8, 1e9) + (os.clock() * 100)
+                -- 3. PROPER ID GENERATION (original working format)
+                local landedID = math.random(9e6, 1e7) + os.clock() -- Original valid range
                 
-                -- 4. Collect energy
-                game:GetService("ReplicatedStorage").Remote.Throw.Server.Landed:InvokeServer(landedID, 0)
+                -- 4. CRUCIAL FIX: Use observed successful parameter
+                game:GetService("ReplicatedStorage").Remote.Throw.Server.Landed:InvokeServer(
+                    landedID, 
+                    5.425 -- Changed from 0 to observed working value
+                )
             end)
         end
     end
 })
+
 
 TestTab:AddToggle({
     Name = "Instant Collect Stars",
