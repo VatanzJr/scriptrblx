@@ -6037,43 +6037,37 @@ TestTab:AddToggle({
 
 
 TestTab:AddToggle({
-    Name = "Instant Energy Loop",
-    Value = _G.InstantEnergy,
+    Name = "Max Energy Loop",
+    Value = _G.MaxEnergy,
     Callback = function(value)
-        _G.InstantEnergy = value
+        _G.MaxEnergy = value
         
-        -- Preconfigured final position (modify these coordinates)
-        local FINAL_POSITION = {
+        -- Configured for high-energy parameters
+        local HIGH_VALUE_POSITION = {
             Vector2int16.new(0, 7),
             Vector3int16.new(10841, -31994, -32109)
         }
 
-        --[[ 
-        Sequence Flow:
-        1. Initial Request (starts throw)
-        2. Single Final Position Update
-        3. Landed Event (energy gain)
-        ]]--
-        while _G.InstantEnergy do
-            task.wait(0.25) -- Adjust delay based on cooldown
+        while _G.MaxEnergy do
+            task.wait(0.5) -- Avoid rate limits
             
             pcall(function()
-                -- 1. Trigger initial throw
-                game:GetService("ReplicatedStorage").Remote.Throw.Server.Request:FireServer()
-                
-                -- 2. Immediately send final position
-                game:GetService("ReplicatedStorage").Remote.Race.Server.RequestPositionUpdate:FireServer({FINAL_POSITION})
-                
-                -- 3. Generate unique landed ID
-                local landedID = os.clock() * 1e9 + math.random(1,9999)
-                
-                -- 4. Collect energy
-                game:GetService("ReplicatedStorage").Remote.Throw.Server.Landed:InvokeServer(landedID, 0)
+                -- 1. Send high-value position
+                game.ReplicatedStorage.Remote.Race.Server.RequestPositionUpdate:FireServer({HIGH_VALUE_POSITION})
+
+                -- 2. Generate fresh parameters
+                local projectileID = os.clock() * 1e9 + math.random(1,9999)
+                local energyMultiplier = 5.425 -- Observed high-value
+
+                -- 3. Trigger energy gain
+                game.ReplicatedStorage.Remote.Throw.Server.Landed:InvokeServer(
+                    projectileID,
+                    energyMultiplier
+                )
             end)
         end
     end
 })
-
 
 TestTab:AddToggle({
     Name = "Instant Collect Stars",
