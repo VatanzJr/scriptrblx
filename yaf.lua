@@ -6037,32 +6037,48 @@ TestTab:AddToggle({
 
 
 TestTab:AddToggle({
-    Name = "Auto Energy",
-    Value = _G.AutoEnergy,
+    Name = "Smart Throw",
+    Value = _G.AutoThrow,
     Callback = function(value)
-        _G.AutoEnergy = value
+        _G.AutoThrow = value
         
-        while _G.AutoEnergy do
-            task.wait(0.5) -- Add delay to prevent crashing
+        -- Initialize position tracker
+        local lastValidPosition = nil
+        
+        -- Phase 1: Initial Request
+        local function SendInitialRequest()
+            game:GetService("ReplicatedStorage").Remote.Throw.Server.Request:FireServer()
+        end
+        
+        -- Phase 2: Capture Final Position
+        local function CapturePosition()
+            lastValidPosition = {
+                Vector2int16.new(9, 3),
+                Vector3int16.new(17356, -30161, -32108)
+            }
+        end
+        
+        -- Phase 3: Execute Final Sequence
+        local function CompleteThrow()
+            -- Send final position once
+            game:GetService("ReplicatedStorage").Remote.Race.Server.RequestPositionUpdate:FireServer({lastValidPosition})
             
+            -- Generate dynamic landing parameter
+            local landingParam = math.random(9e6, 1e7) + os.clock()
+            
+            -- Trigger landing
+            game:GetService("ReplicatedStorage").Remote.Throw.Server.Landed:InvokeServer(landingParam, 0)
+        end
+
+        while _G.AutoThrow do
+            task.wait(0.25)
             pcall(function()
-                -- Dynamic parameters (critical fix)
-                local args = {
-                    os.clock() * 1e6, -- Time-based unique ID
-                    0
-                }
+                SendInitialRequest()
+                CapturePosition() -- Update position before completion
+                CompleteThrow()
                 
-                -- Get remote reference safely
-                local remote = game:GetService("ReplicatedStorage")
-                    :WaitForChild("Remote")
-                    :WaitForChild("Throw")
-                    :WaitForChild("Server")
-                    :WaitForChild("Landed")
-                
-                -- Execute with validation
-                if remote then
-                    remote:InvokeServer(unpack(args))
-                end
+                -- Add randomized delay between throws
+                task.wait(math.random(5, 15)/10)
             end)
         end
     end
