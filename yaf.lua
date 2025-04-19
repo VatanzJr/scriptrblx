@@ -6037,33 +6037,32 @@ TestTab:AddToggle({
 
 
 TestTab:AddToggle({
-    Name = "Auto Energy (Smart)",
+    Name = "Auto Energy",
     Value = _G.AutoEnergy,
     Callback = function(value)
         _G.AutoEnergy = value
         
         while _G.AutoEnergy do
-            task.wait(math.random(5, 15)/10) -- Random delay between 0.5-1.5 seconds
+            task.wait(0.5) -- Add delay to prevent crashing
             
             pcall(function()
-                -- Generate dynamic parameters
-                local dynamicValue = tick() * math.random(1000, 9999)
+                -- Dynamic parameters (critical fix)
                 local args = {
-                    dynamicValue,
-                    math.random(0, 1) -- Randomize second parameter
+                    os.clock() * 1e6, -- Time-based unique ID
+                    0
                 }
                 
-                -- Get remote reference
+                -- Get remote reference safely
                 local remote = game:GetService("ReplicatedStorage")
                     :WaitForChild("Remote")
                     :WaitForChild("Throw")
                     :WaitForChild("Server")
                     :WaitForChild("Landed")
                 
-                -- Fire remote
-                remote:InvokeServer(unpack(args))
-                
-                print("Energy attempt with values:", dynamicValue, args[2])
+                -- Execute with validation
+                if remote then
+                    remote:InvokeServer(unpack(args))
+                end
             end)
         end
     end
