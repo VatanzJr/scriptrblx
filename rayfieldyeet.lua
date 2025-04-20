@@ -34,4 +34,12 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
-local Tab = Window:CreateTab("Main", 11708967881) -- Title, Image
+Rayfield:Notify({
+   Title = "Notification Title",
+   Content = "Notification Content",
+   Duration = 6.5,
+   Image = "rewind",
+})
+
+local Tab = Window:CreateTab("Main", "rewind") -- Title, Image
+local Divider = Tab:CreateDivider()
