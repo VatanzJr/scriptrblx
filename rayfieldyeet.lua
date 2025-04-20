@@ -1,37 +1,22 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
+-- Window configuration remains unchanged
 local Window = Rayfield:CreateWindow({
    Name = "Vatanz Hub",
-   Icon = 11708967881, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
+   Icon = 11708967881,
    LoadingTitle = "Yeet A Friend",
    LoadingSubtitle = "by Vatanz",
-   Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
-
-   DisableRayfieldPrompts = false,
-   DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
-
+   Theme = "Default",
    ConfigurationSaving = {
       Enabled = true,
-      FolderName = nil, -- Create a custom folder for your hub/game
       FileName = "Vatanz Hub"
    },
-
    Discord = {
-      Enabled = false, -- Prompt the user to join your Discord server if their executor supports it
-      Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
-      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+      Enabled = false,
+      Invite = "noinvitelink",
+      RememberJoins = true
    },
-
-   KeySystem = false, -- Set this to true to use our key system
-   KeySettings = {
-      Title = "Untitled",
-      Subtitle = "Key System",
-      Note = "No method of obtaining the key is provided", -- Use this to tell the user how to get a key
-      FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
-      SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
-      GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
-      Key = {"Hello"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
-   }
+   KeySystem = false
 })
 
 Rayfield:Notify({
@@ -41,19 +26,19 @@ Rayfield:Notify({
    Image = "bell-ring",
 })
 
-local Tab = Window:CreateTab("Main", "bell-ring") -- Title, Image
-local Divider = Tab:CreateDivider()
+local Tab = Window:CreateTab("Main", "bell-ring")
+Tab:CreateDivider()
 
-local Button = Tab:CreateButton({
-   Name = "Destroy UI button",
+Tab:CreateButton({
+   Name = "Destroy UI",
    Callback = function()
-   -- The function that takes place when the button is pressed
-   Rayfield:Destroy()
+      Rayfield:Destroy()
    end,
 })
 
-local Players = game:getservice("Players")
-local LocalPlayer = Players.localPlayer
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Workspace = game:GetService("Workspace")
 
 local PlayerDropdown = Tab:CreateDropdown({
    Name = "Teleport to Player",
@@ -62,31 +47,48 @@ local PlayerDropdown = Tab:CreateDropdown({
    MultipleOptions = false,
    Flag = "TeleportDropdown",
    Callback = function(Options)
-         local selectedName = Options[1]
-         local targetPlayer = Players:FindFirstChild(selectedName)
-         
-         if targetPlayer and targetPlayer.Character then
-             local humanoidRootPart = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
-             if humanoidRootPart then
-                 LocalPlayer.Character:MoveTo(humanoidRootPart.Position + Vector3.new(0, 3, 0))
-             end
-         end
+      local selectedName = Options[1]
+      
+      -- Find target player's character model
+      local targetModel = Workspace:FindFirstChild(selectedName)
+      if targetModel then
+          -- Get target's HRP using proper hierarchy
+          local targetHRP = targetModel:FindFirstChild("HumanoidRootPart")
+          
+          -- Get local player's character model
+          local localModel = Workspace:FindFirstChild(LocalPlayer.Name)
+          if localModel and targetHRP then
+              -- Get local player's HRP using proper hierarchy
+              local localHRP = localModel:FindFirstChild("HumanoidRootPart")
+              
+              if localHRP then
+                  -- Teleport using CFrame with offset
+                  localHRP.CFrame = targetHRP.CFrame * CFrame.new(0, 3, 0)
+              end
+          end
+      else
+          Rayfield:Notify({
+              Title = "Error",
+              Content = "Player not found in workspace",
+              Duration = 3,
+              Image = "alert-triangle"
+          })
+      end
    end,
 })
 
 local function GetPlayerNames()
-         local names = {}
-         for _, player in ipairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer then
-               table.insert(names, player.Name)
-            end
-         end
-         return names
+   local names = {}
+   for _, player in ipairs(Players:GetPlayers()) do
+      if player ~= LocalPlayer then
+         table.insert(names, player.Name)
+      end
+   end
+   return names
 end
 
 local function RefreshDropdown()
-         local playerNames = GetPlayerNames()
-         PlayerDropdown:SetOptions(playerNames)
+   PlayerDropdown:SetOptions(GetPlayerNames())
 end
 
 RefreshDropdown()
