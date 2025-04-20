@@ -1,21 +1,19 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
--- Services
+local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- Window
 local Window = Rayfield:CreateWindow({
     Name = "Vatanz Hub",
-    LoadingTitle = "Teleport System",
+    LoadingTitle = "Workspace-Based Teleport",
     LoadingSubtitle = "by Vatanz",
     ConfigurationSaving = { Enabled = true, FileName = "VatanzHub" }
 })
 
--- Main Tab
 local Tab = Window:CreateTab("Main", "bell-ring")
 
--- Destroy UI Button (kept as requested)
+-- Destroy UI Button (as requested)
 Tab:CreateButton({
     Name = "Destroy UI",
     Callback = function()
@@ -23,48 +21,61 @@ Tab:CreateButton({
     end,
 })
 
--- Teleport System
+-- Get player models directly from Workspace
+local function GetWorkspacePlayers()
+    local validPlayers = {}
+    for _, child in ipairs(Workspace:GetChildren()) do
+        if child:IsA("Model") then
+            local hrp = child:FindFirstChild("HumanoidRootPart")
+            local isPlayer = Players:FindFirstChild(child.Name)
+            
+            -- Exclude self and non-player models
+            if hrp and isPlayer and child.Name ~= LocalPlayer.Name then
+                table.insert(validPlayers, child.Name)
+            end
+        end
+    end
+    return validPlayers
+end
+
+-- Teleport to Workspace model
 local PlayerDropdown = Tab:CreateDropdown({
     Name = "Teleport to Player",
-    Options = {},
+    Options = GetWorkspacePlayers(),
     Flag = "TeleportDropdown",
     Callback = function(Selected)
         local targetName = Selected[1]
-        local targetPlayer = Players:FindFirstChild(targetName)
+        local targetModel = Workspace:FindFirstChild(targetName)
         
-        if targetPlayer and targetPlayer.Character then
-            local targetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
-            local localChar = LocalPlayer.Character
+        if targetModel then
+            local targetHRP = targetModel:FindFirstChild("HumanoidRootPart")
+            local localModel = Workspace:WaitForChild(LocalPlayer.Name)
             
-            if targetHRP and localChar then
-                local localHRP = localChar:FindFirstChild("HumanoidRootPart")
-                if localHRP then
-                    -- Two teleport methods (choose one)
-                    -- Method 1: Instant teleport
-                    localHRP.CFrame = targetHRP.CFrame * CFrame.new(0, 3, 0)
-                    
-                    -- Method 2: Natural movement
-                    -- LocalPlayer:MoveTo(targetHRP.Position + Vector3.new(0, 3, 0))
-                end
+            if targetHRP and localModel then
+                local localHRP = localModel:WaitForChild("HumanoidRootPart")
+                localHRP.CFrame = targetHRP.CFrame * CFrame.new(0, 3, 0)
             end
         end
     end
 })
 
--- Player list updater
-local function UpdatePlayers()
-    local playerList = {}
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
-            table.insert(playerList, player.Name)
-        end
-    end
-    PlayerDropdown:SetOptions(playerList)
+-- Update when models change
+local function UpdateList()
+    PlayerDropdown:SetOptions(GetWorkspacePlayers())
 end
 
--- Initial update
-UpdatePlayers()
+Workspace.ChildAdded:Connect(function(child)
+    if child:IsA("Model") then
+        task.wait(0.5) -- Wait for HRP to load
+        UpdateList()
+    end
+end)
 
--- Connections
-Players.PlayerAdded:Connect(UpdatePlayers)
-Players.PlayerRemoving:Connect(UpdatePlayers)
+Workspace.ChildRemoved:Connect(function(child)
+    if child:IsA("Model") then
+        UpdateList()
+    end
+end)
+
+-- Initial update
+UpdateList()
