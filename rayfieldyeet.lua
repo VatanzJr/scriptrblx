@@ -38,8 +38,8 @@ Rayfield:Notify({
    Title = "Hello User",
    Content = "Script was loaded",
    Duration = 6.5,
-   Image = "rewind",
+   Image = "bell-ring",
 })
 
-local Tab = Window:CreateTab("Main", "rewind") -- Title, Image
+local Tab = Window:CreateTab("Main", "house") -- Title, Image
 local Divider = Tab:CreateDivider()
