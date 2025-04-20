@@ -4,77 +4,104 @@ local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
 local Window = Rayfield:CreateWindow({
-    Name = "Display Name Teleporter",
+    Name = "Teleport by Display Name",
     ConfigurationSaving = { Enabled = true, FileName = "VatanzHub" }
 })
 
 local Tab = Window:CreateTab("Main", "bell-ring")
 
--- Destroy UI Button
-Tab:CreateButton({
-    Name = "Destroy UI",
-    Callback = function() Rayfield:Destroy() end,
-})
+-- Debugging function
+local function debug(message)
+    print("[DEBUG] " .. message)
+    Rayfield:Notify({
+        Title = "Debug",
+        Content = message,
+        Duration = 3
+    })
+end
 
--- Get players with display names and valid models
-local function GetPlayersWithModels()
-    local playerList = {}
+-- Get valid players with models
+local function GetValidPlayers()
+    local valid = {}
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer then
             local character = Workspace:FindFirstChild(player.Name)
             if character and character:FindFirstChild("HumanoidRootPart") then
-                table.insert(playerList, {
+                debug("Found valid player: " .. player.DisplayName)
+                table.insert(valid, {
                     DisplayName = player.DisplayName,
                     UserName = player.Name
                 })
+            else
+                debug("Missing model/HRP for: " .. player.DisplayName)
             end
         end
     end
-    return playerList
+    return valid
 end
 
--- Create dropdown with display names
+-- Create dropdown
 local PlayerDropdown = Tab:CreateDropdown({
-    Name = "Teleport to Player",
-    Options = {},
-    Flag = "TeleportDropdown",
-    Callback = function(Selected)
-        local targetDisplayName = Selected[1]
-        for _, data in ipairs(GetPlayersWithModels()) do
-            if data.DisplayName == targetDisplayName then
-                local targetModel = Workspace:FindFirstChild(data.UserName)
-                local localModel = Workspace:FindFirstChild(LocalPlayer.Name)
-                
-                if targetModel and localModel then
-                    local targetHRP = targetModel.HumanoidRootPart
-                    local localHRP = localModel.HumanoidRootPart
-                    localHRP.CFrame = targetHRP.CFrame * CFrame.new(0, 3, 0)
-                end
-                break
-            end
-        end
-    end
+    Name = "Select Player",
+    Options = {"Loading..."},
+    Flag = "TeleportDropdown"
 })
 
--- Update dropdown list
+-- Update dropdown
 local function UpdateList()
-    local players = GetPlayersWithModels()
+    debug("Updating player list...")
+    local players = GetValidPlayers()
+    
+    if #players == 0 then
+        debug("No valid players found")
+        PlayerDropdown:SetOptions({"No players available"})
+        return
+    end
+    
     local displayNames = {}
     for _, data in ipairs(players) do
         table.insert(displayNames, data.DisplayName)
     end
+    
     PlayerDropdown:SetOptions(displayNames)
+    debug("List updated with " .. #displayNames .. " players")
 end
 
--- Track player changes
-Players.PlayerAdded:Connect(UpdateList)
-Players.PlayerRemoving:Connect(UpdateList)
-Workspace.ChildAdded:Connect(function(child)
-    if child:IsA("Model") then
-        task.wait(0.5)
+-- Character tracking
+local function TrackCharacter(player)
+    player.CharacterAdded:Connect(function(char)
+        debug("Character added: " .. player.Name)
         UpdateList()
+    end)
+    
+    player.CharacterRemoving:Connect(function(char)
+        debug("Character removed: " .. player.Name)
+        UpdateList()
+    end)
+end
+
+-- Initial setup
+for _, player in ipairs(Players:GetPlayers()) do
+    if player ~= LocalPlayer then
+        TrackCharacter(player)
     end
+end
+
+Players.PlayerAdded:Connect(function(newPlayer)
+    debug("New player joined: " .. newPlayer.Name)
+    TrackCharacter(newPlayer)
+    UpdateList()
 end)
 
--- Initial update
+Players.PlayerRemoving:Connect(function(leftPlayer)
+    debug("Player left: " .. leftPlayer.Name)
+    UpdateList()
+end)
+
+-- First update
 UpdateList()
+
+Tab:CreateButton({
+    Name = "Destroy UI",
+    Callback = function() Rayfield:Destroy() end,
+})
