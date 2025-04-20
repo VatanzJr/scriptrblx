@@ -48,6 +48,6 @@ local Button = Tab:CreateButton({
    Name = "Destroy UI button",
    Callback = function()
    -- The function that takes place when the button is pressed
-         Rayfield:Destroy()
+   Rayfield:Destroy()
    end,
 })
