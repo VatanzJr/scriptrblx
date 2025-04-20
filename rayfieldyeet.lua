@@ -41,7 +41,7 @@ Rayfield:Notify({
    Image = "bell-ring",
 })
 
-local Tab = Window:CreateTab("Main", "house") -- Title, Image
+local Tab = Window:CreateTab("Main", "bell-ring") -- Title, Image
 local Divider = Tab:CreateDivider()
 
 local Button = Tab:CreateButton({
