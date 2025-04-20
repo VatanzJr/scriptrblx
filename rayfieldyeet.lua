@@ -36,7 +36,7 @@ local Window = Rayfield:CreateWindow({
 
 Rayfield:Notify({
    Title = "Hello User",
-   Content = "Script was loaded",
+   Content = "Script has loaded",
    Duration = 6.5,
    Image = "bell-ring",
 })
@@ -51,3 +51,45 @@ local Button = Tab:CreateButton({
    Rayfield:Destroy()
    end,
 })
+
+local Players = game:getservice("Players")
+local LocalPlayer = Players.localPlayer
+
+local PlayerDropdown = Tab:CreateDropdown({
+   Name = "Teleport to Player",
+   Options = {},
+   CurrentOption = {},
+   MultipleOptions = false,
+   Flag = "TeleportDropdown",
+   Callback = function(Options)
+         local selectedName = Options[1]
+         local targetPlayer = Players:FindFirstChild(selectedName)
+         
+         if targetPlayer and targetPlayer.Character then
+             local humanoidRootPart = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+             if humanoidRootPart then
+                 LocalPlayer.Character:MoveTo(humanoidRootPart.Position + Vector3.new(0, 3, 0))
+             end
+         end
+   end,
+})
+
+local function GetPlayerNames()
+         local names = {}
+         for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+               table.insert(names, player.Name)
+            end
+         end
+         return names
+end
+
+local function RefreshDropdown()
+         local playerNames = GetPlayerNames()
+         PlayerDropdown:SetOptions(playerNames)
+end
+
+RefreshDropdown()
+
+Players.PlayerAdded:Connect(RefreshDropdown)
+Players.PlayerRemoving:Connect(RefreshDropdown)
