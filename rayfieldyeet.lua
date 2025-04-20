@@ -1,10 +1,9 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
 
 local Window = Rayfield:CreateWindow({
-    Name = "Workspace Player Teleporter",
-    LoadingTitle = "Direct Model Detection",
-    LoadingSubtitle = "by Vatanz",
+    Name = "Teleport by Display Name",
     ConfigurationSaving = { Enabled = true, FileName = "VatanzHub" }
 })
 
@@ -16,51 +15,68 @@ Tab:CreateButton({
     Callback = function() Rayfield:Destroy() end,
 })
 
--- Get all valid player models in Workspace
-local function GetWorkspacePlayers()
-    local validPlayers = {}
+-- Fungsi untuk mendapatkan DisplayName dan username
+local function GetPlayerDisplayNames()
+    local playerData = {}
+    
+    -- Cari semua model di Workspace
     for _, model in ipairs(Workspace:GetChildren()) do
-        if model:IsA("Model") then
-            local hrp = model:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                table.insert(validPlayers, model.Name)
+        if model:IsA("Model") and model:FindFirstChild("HumanoidRootPart") then
+            -- Cari player berdasarkan username (nama model)
+            local player = Players:FindFirstChild(model.Name)
+            if player then
+                table.insert(playerData, {
+                    DisplayName = player.DisplayName,
+                    UserName = player.Name
+                })
             end
         end
     end
-    return validPlayers
+    
+    return playerData
 end
 
--- Teleport between models
+-- Buat dropdown dengan DisplayName
 local PlayerDropdown = Tab:CreateDropdown({
-    Name = "Teleport to Player Model",
-    Options = GetWorkspacePlayers(),
+    Name = "Teleport to Player",
+    Options = {},
     Flag = "TeleportDropdown",
     Callback = function(Selected)
-        local targetName = Selected[1]
-        local targetModel = Workspace:FindFirstChild(targetName)
+        local selectedDisplayName = Selected[1]
         
-        if targetModel then
-            local targetHRP = targetModel:FindFirstChild("HumanoidRootPart")
-            local localModel = Workspace:FindFirstChild(game.Players.LocalPlayer.Name)
-            
-            if targetHRP and localModel then
-                local localHRP = localModel:FindFirstChild("HumanoidRootPart")
-                if localHRP then
+        -- Cari username yang sesuai dengan DisplayName
+        for _, data in ipairs(GetPlayerDisplayNames()) do
+            if data.DisplayName == selectedDisplayName then
+                local targetModel = Workspace:FindFirstChild(data.UserName)
+                local localModel = Workspace:FindFirstChild(Players.LocalPlayer.Name)
+                
+                if targetModel and localModel then
+                    local targetHRP = targetModel.HumanoidRootPart
+                    local localHRP = localModel.HumanoidRootPart
                     localHRP.CFrame = targetHRP.CFrame * CFrame.new(0, 3, 0)
                 end
+                break
             end
         end
     end
 })
 
--- Update list when models change
+-- Update dropdown list
 local function UpdateList()
-    PlayerDropdown:SetOptions(GetWorkspacePlayers())
+    local players = GetPlayerDisplayNames()
+    local displayNames = {}
+    
+    for _, data in ipairs(players) do
+        table.insert(displayNames, data.DisplayName)
+    end
+    
+    PlayerDropdown:SetOptions(displayNames)
 end
 
+-- Update saat ada perubahan di Workspace
 Workspace.ChildAdded:Connect(function(child)
-    if child:IsA("Model") and child:FindFirstChild("HumanoidRootPart") then
-        task.wait(0.2) -- Wait for potential HRP initialization
+    if child:IsA("Model") then
+        task.wait(0.5) -- Tunggu HRP terload
         UpdateList()
     end
 end)
@@ -71,5 +87,5 @@ Workspace.ChildRemoved:Connect(function(child)
     end
 end)
 
--- Initial update
+-- Update awal
 UpdateList()
