@@ -34,6 +34,12 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
+Rayfield:Notify({
+   Title = "Hello User",
+   Content = "Script was loaded",
+   Duration = 6.5,
+   Image = "bell-ring",
+})
 
 local Tab = Window:CreateTab("Main", "bell-ring") -- Title, Image
 local Divider = Tab:CreateDivider()
