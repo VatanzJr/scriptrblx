@@ -1,80 +1,35 @@
-local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-    Name = "Star Collector",
-    LoadingTitle = "Star Collection System",
-    LoadingSubtitle = "by Your Name",
-    ConfigurationSaving = {
-        Enabled = true,
-        FolderName = "StarCollectorConfigs",
-        FileName = "StarConfig"
-    }
-})
+   Name = "Vatanz Hub",
+   Icon = 11708967881, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
+   LoadingTitle = "Yeet A Friend",
+   LoadingSubtitle = "by Vatanz",
+   Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
 
-local MainTab = Window:CreateTab("Main", 4483362458) -- Icon ID
+   DisableRayfieldPrompts = false,
+   DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
 
-MainTab:CreateToggle({
-    Name = "Teleport Stars to Me",
-    CurrentValue = _G.AutoFarm or false,
-    Flag = "AutoFarmToggle", -- For configuration saving
-    Callback = function(Value)
-        _G.AutoFarm = Value
-        
-        -- Star collection function
-        local function collectStars()
-            pcall(function()
-                local player = game.Players.LocalPlayer
-                local character = player.Character
-                local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
-                
-                if humanoidRootPart then
-                    -- Teleport all stars to player
-                    for _, star in ipairs(game.Workspace.Stars:GetChildren()) do
-                        if star:IsA("Model") and star:FindFirstChild("Root") then
-                            -- Instant teleport and collect
-                            star.Root.CFrame = humanoidRootPart.CFrame
-                            game:GetService("ReplicatedStorage").Remote.Star.Server.Collect:FireServer(star.Name)
-                        end
-                    end
-                end
-            end)
-        end
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = nil, -- Create a custom folder for your hub/game
+      FileName = "Vatanz Hub"
+   },
 
-        -- Connection management
-        if Value then
-            -- Create connection for new stars
-            _G.StarConnection = game.Workspace.Stars.ChildAdded:Connect(function(star)
-                if _G.AutoFarm then
-                    task.wait(0.1)
-                    collectStars()
-                end
-            end)
-            
-            -- Start collection loop
-            _G.CollectionLoop = task.spawn(function()
-                while _G.AutoFarm do
-                    collectStars()
-                    task.wait(0.05) -- Aggressive collection interval
-                end
-            end)
-        else
-            -- Cleanup when disabled
-            if _G.StarConnection then
-                _G.StarConnection:Disconnect()
-                _G.StarConnection = nil
-            end
-            if _G.CollectionLoop then
-                task.cancel(_G.CollectionLoop)
-                _G.CollectionLoop = nil
-            end
-        end
-    end
-})
+   Discord = {
+      Enabled = false, -- Prompt the user to join your Discord server if their executor supports it
+      Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
+      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+   },
 
--- Optional: Add notification when loaded
-Rayfield:Notify({
-    Title = "Star Collector Loaded",
-    Content = "Successfully injected star collection system!",
-    Duration = 5,
-    Image = 4483362458
+   KeySystem = false, -- Set this to true to use our key system
+   KeySettings = {
+      Title = "Untitled",
+      Subtitle = "Key System",
+      Note = "No method of obtaining the key is provided", -- Use this to tell the user how to get a key
+      FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+      SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+      GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+      Key = {"Hello"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+   }
 })
