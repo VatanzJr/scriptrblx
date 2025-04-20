@@ -35,8 +35,8 @@ local Window = Rayfield:CreateWindow({
 })
 
 Rayfield:Notify({
-   Title = "Notification Title",
-   Content = "Notification Content",
+   Title = "Hello User",
+   Content = "Script was loaded",
    Duration = 6.5,
    Image = "rewind",
 })
