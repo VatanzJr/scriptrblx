@@ -1,9 +1,10 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
 
 local Window = Rayfield:CreateWindow({
-    Name = "Workspace Player Teleporter",
-    LoadingTitle = "Direct Model Detection",
+    Name = "Vatanz Hub",
+    LoadingTitle = "Multi-Feature Hub",
     LoadingSubtitle = "by Vatanz",
     ConfigurationSaving = { Enabled = true, FileName = "VatanzHub" }
 })
@@ -16,7 +17,7 @@ Tab:CreateButton({
     Callback = function() Rayfield:Destroy() end,
 })
 
--- Get all valid player models in Workspace
+-- Player Teleport Section
 local function GetWorkspacePlayers()
     local validPlayers = {}
     for _, model in ipairs(Workspace:GetChildren()) do
@@ -30,9 +31,8 @@ local function GetWorkspacePlayers()
     return validPlayers
 end
 
--- Teleport between models
 local PlayerDropdown = Tab:CreateDropdown({
-    Name = "Teleport to Player Model",
+    Name = "Teleport to Player",
     Options = GetWorkspacePlayers(),
     Flag = "TeleportDropdown",
     Callback = function(Selected)
@@ -41,7 +41,7 @@ local PlayerDropdown = Tab:CreateDropdown({
         
         if targetModel then
             local targetHRP = targetModel:FindFirstChild("HumanoidRootPart")
-            local localModel = Workspace:FindFirstChild(game.Players.LocalPlayer.Name)
+            local localModel = Workspace:FindFirstChild(Players.LocalPlayer.Name)
             
             if targetHRP and localModel then
                 local localHRP = localModel:FindFirstChild("HumanoidRootPart")
@@ -53,14 +53,58 @@ local PlayerDropdown = Tab:CreateDropdown({
     end
 })
 
--- Update list when models change
+-- Auto Farm Stars Toggle
+Tab:CreateToggle({
+    Name = "Teleport Stars to Me",
+    CurrentValue = false,
+    Flag = "AutoFarmToggle",
+    Callback = function(Value)
+        _G.AutoFarm = Value
+        
+        local function MoveStars()
+            pcall(function()
+                local plr = Players.LocalPlayer
+                if plr and plr.Character then
+                    local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        for _, star in ipairs(Workspace.Stars:GetChildren()) do
+                            if star:IsA("Model") and star:FindFirstChild("Root") then
+                                star.Root.CFrame = hrp.CFrame
+                                game:GetService("ReplicatedStorage").Remote.Star.Server.Collect:FireServer(star.Name)
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+
+        local connection
+        if Value then
+            connection = Workspace.Stars.ChildAdded:Connect(function(star)
+                MoveStars()
+            end)
+        end
+
+        while _G.AutoFarm do
+            MoveStars()
+            task.wait(0.05)
+            if not _G.AutoFarm then break end
+        end
+
+        if connection then
+            connection:Disconnect()
+        end
+    end
+})
+
+-- Update List Function
 local function UpdateList()
     PlayerDropdown:SetOptions(GetWorkspacePlayers())
 end
 
 Workspace.ChildAdded:Connect(function(child)
     if child:IsA("Model") and child:FindFirstChild("HumanoidRootPart") then
-        task.wait(0.2) -- Wait for potential HRP initialization
+        task.wait(0.2)
         UpdateList()
     end
 end)
@@ -71,5 +115,4 @@ Workspace.ChildRemoved:Connect(function(child)
     end
 end)
 
--- Initial update
 UpdateList()
