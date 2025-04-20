@@ -1,81 +1,81 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
+-- Services
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local LocalPlayer = Players.LocalPlayer
+
 -- Create Window
 local Window = Rayfield:CreateWindow({
     Name = "Vatanz Hub",
-    LoadingTitle = "Player Teleporter",
-    LoadingSubtitle = "by Vatanz",
+    LoadingTitle = "Proper Teleport System",
+    LoadingSubtitle = "Using Workspace Characters",
     ConfigurationSaving = { Enabled = true, FileName = "VatanzHub" }
 })
 
--- Services
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-
--- Main Tab
 local Tab = Window:CreateTab("Main", "bell-ring")
 
--- Teleport System
+-- Get ACTUAL PLAYER MODELS from Workspace
+local function GetPlayerModels()
+    local players = {}
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            local character = Workspace:FindFirstChild(player.Name)
+            if character then
+                table.insert(players, player.Name)
+            end
+        end
+    end
+    return players
+end
+
+-- Teleport to Workspace character
 local PlayerDropdown = Tab:CreateDropdown({
     Name = "Teleport to Player",
-    Options = {}, -- Start with empty list
+    Options = GetPlayerModels(),
     Flag = "TeleportDropdown",
     Callback = function(Selected)
         local targetName = Selected[1]
-        local targetPlayer = Players[targetName]
+        local targetCharacter = Workspace:FindFirstChild(targetName)
         
-        if targetPlayer and targetPlayer ~= LocalPlayer then
-            local targetChar = targetPlayer.Character or targetPlayer.CharacterAdded:Wait()
-            local localChar = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+        if targetCharacter then
+            local targetHRP = targetCharacter:FindFirstChild("HumanoidRootPart")
+            local localCharacter = Workspace:FindFirstChild(LocalPlayer.Name)
             
-            local targetHRP = targetChar:WaitForChild("HumanoidRootPart")
-            local localHRP = localChar:WaitForChild("HumanoidRootPart")
-            
-            if targetHRP and localHRP then
-                localHRP.CFrame = targetHRP.CFrame * CFrame.new(0, 3, 0)
-                Rayfield:Notify({
-                    Title = "Success!",
-                    Content = "Teleported to "..targetName,
-                    Duration = 2
-                })
+            if targetHRP and localCharacter then
+                local localHRP = localCharacter:FindFirstChild("HumanoidRootPart")
+                if localHRP then
+                    localHRP.CFrame = targetHRP.CFrame * CFrame.new(0, 3, 0)
+                    Rayfield:Notify({
+                        Title = "Teleported!",
+                        Content = "Moved to "..targetName.."'s position",
+                        Duration = 3
+                    })
+                end
             end
         end
     end
 })
 
--- Player List Management
-local function UpdatePlayerList()
-    local playerNames = {}
-    
-    -- Get all players except yourself
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
-            table.insert(playerNames, player.Name)
-        end
-    end
-    
-    -- Update dropdown only if there are players
-    if #playerNames > 0 then
-        PlayerDropdown:SetOptions(playerNames)
-    else
-        PlayerDropdown:SetOptions({"No other players"})
-    end
+-- Update player list in real-time
+local function UpdateDropdown()
+    PlayerDropdown:SetOptions(GetPlayerModels())
 end
 
--- Initial population
-UpdatePlayerList()
-
--- Player tracking
 Players.PlayerAdded:Connect(function(player)
-    task.wait(0.2) -- Wait for player to fully initialize
-    UpdatePlayerList()
+    player.CharacterAdded:Connect(function(character)
+        wait(0.5) -- Wait for model to load
+        UpdateDropdown()
+    end)
 end)
 
 Players.PlayerRemoving:Connect(function(player)
-    UpdatePlayerList()
+    UpdateDropdown()
 end)
 
--- Destroy UI Button
+-- Initial update
+UpdateDropdown()
+
 Tab:CreateButton({
     Name = "Destroy UI",
     Callback = function()
