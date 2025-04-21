@@ -1,10 +1,11 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Window = Rayfield:CreateWindow({
     Name = "Vatanz Hub",
-    LoadingTitle = "Multi-Feature Hub",
+    LoadingTitle = "Multi-Feature Hub 1",
     LoadingSubtitle = "by Vatanz",
     ConfigurationSaving = { Enabled = true, FileName = "VatanzHub" }
 })
@@ -14,9 +15,7 @@ local MainTab = Window:CreateTab("Main", "bell-ring")
 
 MainTab:CreateButton({
     Name = "Destroy UI",
-    Callback = function()
-        Rayfield:Destroy()
-    end,
+    Callback = function() Rayfield:Destroy() end,
 })
 
 -- Teleport to Player
@@ -37,31 +36,30 @@ local PlayerDropdown = MainTab:CreateDropdown({
     Callback = function(Selected)
         local targetName = Selected[1]
         local targetModel = Workspace:FindFirstChild(targetName)
-        if targetModel and targetModel:FindFirstChild("HumanoidRootPart") then
-            local localChar = Workspace:FindFirstChild(Players.LocalPlayer.Name)
-            if localChar and localChar:FindFirstChild("HumanoidRootPart") then
-                localChar.HumanoidRootPart.CFrame = targetModel.HumanoidRootPart.CFrame * CFrame.new(0, 3, 0)
-            end
+        local localModel = Workspace:FindFirstChild(Players.LocalPlayer.Name)
+        if targetModel and targetModel:FindFirstChild("HumanoidRootPart") and localModel and localModel:FindFirstChild("HumanoidRootPart") then
+            localModel.HumanoidRootPart.CFrame = targetModel.HumanoidRootPart.CFrame * CFrame.new(0, 3, 0)
         end
     end
 })
 
--- Auto Stars Logic
+-- ===== AUTO STARS =====
 local function MoveStars()
     pcall(function()
-        local char = Players.LocalPlayer.Character
+        local char = Workspace:FindFirstChild(Players.LocalPlayer.Name)
         if char and char:FindFirstChild("HumanoidRootPart") then
             for _, star in ipairs(Workspace.Stars:GetChildren()) do
                 if star:IsA("Model") and star:FindFirstChild("Root") then
                     star.Root.CFrame = char.HumanoidRootPart.CFrame
-                    game:GetService("ReplicatedStorage").Remote.Star.Server.Collect:FireServer(star.Name)
+                    ReplicatedStorage.Remote.Star.Server.Collect:FireServer(star.Name)
                 end
             end
         end
     end)
 end
 
-MainTab:CreateToggle({
+local AutoStarsToggle
+AutoStarsToggle = MainTab:CreateToggle({
     Name = "Auto Stars",
     CurrentValue = false,
     Flag = "AutoStarsToggle",
@@ -83,6 +81,11 @@ MainTab:CreateToggle({
     end
 })
 
+-- Force toggle ON visually and functionally on script run
+task.defer(function()
+    AutoStarsToggle:Set(true)
+end)
+
 -- ===== TOOLS TAB =====
 local ToolsTab = Window:CreateTab("Tools", "settings")
 
@@ -90,12 +93,7 @@ ToolsTab:CreateButton({
     Name = "Open Dark Dex",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Babyhamsta/RBLX_Scripts/main/Universal/BypassedDarkDexV3.lua", true))()
-        Rayfield:Notify({
-            Title = "Success",
-            Content = "Dark Dex loaded!",
-            Duration = 3,
-            Image = "check"
-        })
+        Rayfield:Notify({ Title = "Success", Content = "Dark Dex loaded!", Duration = 3, Image = "check" })
     end,
 })
 
@@ -106,7 +104,7 @@ ToolsTab:CreateButton({
     end,
 })
 
--- ===== TEST TAB =====
+-- ===== TEST TAB (Auto Throw) =====
 local TestTab = Window:CreateTab("Test", "flame")
 
 local OriginalThrowCFrame = CFrame.new(
@@ -126,18 +124,18 @@ TestTab:CreateToggle({
             _G.throwLoop = task.spawn(function()
                 while _G.Loop do
                     pcall(function()
-                        local char = Players.LocalPlayer.Character
+                        local char = Workspace:FindFirstChild(Players.LocalPlayer.Name)
                         if not char or not char:FindFirstChild("HumanoidRootPart") then return end
 
                         local hrp = char.HumanoidRootPart
                         local oldCFrame = hrp.CFrame
 
-                        local throwArea = Workspace:FindFirstChild("World"):FindFirstChild("ThrowArea")
+                        local throwArea = Workspace:FindFirstChild("World") and Workspace.World:FindFirstChild("ThrowArea")
                         if throwArea and throwArea:IsA("Part") then
                             hrp.CFrame = throwArea.CFrame + Vector3.new(0, 3, 0)
                             task.wait(0.3)
 
-                            local throwRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("Throw"):WaitForChild("Server"):WaitForChild("Request")
+                            local throwRemote = ReplicatedStorage:WaitForChild("Remote"):WaitForChild("Throw"):WaitForChild("Server"):WaitForChild("Request")
                             throwRemote:FireServer()
 
                             task.wait(0.5)
@@ -153,8 +151,7 @@ TestTab:CreateToggle({
                 _G.throwLoop = nil
             end
 
-            -- Reset ThrowArea
-            local throwArea = Workspace:FindFirstChild("World"):FindFirstChild("ThrowArea")
+            local throwArea = Workspace:FindFirstChild("World") and Workspace.World:FindFirstChild("ThrowArea")
             if throwArea and throwArea:IsA("Part") then
                 throwArea.CFrame = OriginalThrowCFrame
             end
@@ -162,7 +159,7 @@ TestTab:CreateToggle({
     end
 })
 
--- ===== AUTO-UPDATES =====
+-- ===== AUTO-UPDATE PLAYER DROPDOWN =====
 local function UpdateList()
     PlayerDropdown:SetOptions(GetWorkspacePlayers())
 end
@@ -180,5 +177,5 @@ Workspace.ChildRemoved:Connect(function(child)
     end
 end)
 
--- Initial setup
+-- Initial
 UpdateList()
