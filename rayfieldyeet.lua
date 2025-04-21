@@ -4,7 +4,7 @@ local Players = game:GetService("Players")
 
 local Window = Rayfield:CreateWindow({
     Name = "Vatanz Hub",
-    LoadingTitle = "Multi-Feature Hub test throw",
+    LoadingTitle = "Multi-Feature Hub test throw2",
     LoadingSubtitle = "by Vatanz",
     ConfigurationSaving = { Enabled = true, FileName = "VatanzHub" }
 })
