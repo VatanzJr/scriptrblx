@@ -12,7 +12,7 @@ local Window = Rayfield:CreateWindow({
 })
 
 -- ===== MAIN TAB =====
-local MainTab = Window:CreateTab("Main", "bell-ring")
+local MainTab = Window:CreateTab("Main", "locate")
 
 MainTab:CreateButton({
     Name = "Destroy UI",
