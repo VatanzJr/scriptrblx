@@ -86,24 +86,6 @@ task.defer(function()
     AutoStarsToggle:Set(true)
 end)
 
--- ===== TOOLS TAB =====
-local ToolsTab = Window:CreateTab("Tools", "settings")
-
-ToolsTab:CreateButton({
-    Name = "Open Dark Dex",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Babyhamsta/RBLX_Scripts/main/Universal/BypassedDarkDexV3.lua", true))()
-        Rayfield:Notify({ Title = "Success", Content = "Dark Dex loaded!", Duration = 3, Image = "check" })
-    end,
-})
-
-ToolsTab:CreateButton({
-    Name = "Simple Spy",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/exxtremestuffs/SimpleSpySource/master/SimpleSpy.lua", true))()
-    end,
-})
-
 -- ===== TEST TAB (Auto Throw) =====
 local TestTab = Window:CreateTab("Test", "flame")
 
@@ -125,23 +107,29 @@ TestTab:CreateToggle({
                 while _G.Loop do
                     pcall(function()
                         local char = Workspace:FindFirstChild(Players.LocalPlayer.Name)
-                        if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+                        if char and char:FindFirstChild("HumanoidRootPart") then
 
-                        local hrp = char.HumanoidRootPart
-                        local oldCFrame = hrp.CFrame
+                            -- Save original CFrame
+                            local hrp = char.HumanoidRootPart
+                            local oldCFrame = hrp.CFrame
 
-                        local throwArea = Workspace:FindFirstChild("World") and Workspace.World:FindFirstChild("ThrowArea")
-                        if throwArea and throwArea:IsA("Part") then
-                            hrp.CFrame = throwArea.CFrame + Vector3.new(0, 3, 0)
-                            task.wait(0.3)
+                            -- Teleport to ThrowArea
+                            local throwArea = Workspace.World:FindFirstChild("ThrowArea")
+                            if throwArea and throwArea:IsA("Part") then
+                                hrp.CFrame = OriginalThrowCFrame
+                                task.wait(0.3)
 
-                            local throwRemote = ReplicatedStorage:WaitForChild("Remote"):WaitForChild("Throw"):WaitForChild("Server"):WaitForChild("Request")
-                            throwRemote:FireServer()
+                                -- Fire the throw action
+                                local throwRemote = ReplicatedStorage:WaitForChild("Remote"):WaitForChild("Throw"):WaitForChild("Server"):WaitForChild("Request")
+                                throwRemote:FireServer()
 
-                            task.wait(0.5)
-                            hrp.CFrame = oldCFrame
-                        end
-                    end)
+                                -- Wait for 7 seconds before returning
+                                task.wait(7)
+
+                                -- Return to the original position
+                                hrp.CFrame = oldCFrame
+                            end
+                        end)
                     task.wait(7)
                 end
             end)
@@ -149,11 +137,6 @@ TestTab:CreateToggle({
             if _G.throwLoop then
                 task.cancel(_G.throwLoop)
                 _G.throwLoop = nil
-            end
-
-            local throwArea = Workspace:FindFirstChild("World") and Workspace.World:FindFirstChild("ThrowArea")
-            if throwArea and throwArea:IsA("Part") then
-                throwArea.CFrame = OriginalThrowCFrame
             end
         end
     end
