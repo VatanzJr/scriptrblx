@@ -19,38 +19,6 @@ MainTab:CreateButton({
     Callback = function() Rayfield:Destroy() end,
 })
 
--- ===== Teleport to Player (by DisplayName) =====
-local DisplayNameMap = {}
-
-local function GetWorkspacePlayers()
-    local validDisplayNames = {}
-    DisplayNameMap = {}
-
-    for _, player in ipairs(Players:GetPlayers()) do
-        local name = player.Name
-        local display = player.DisplayName
-        table.insert(validDisplayNames, display)
-        DisplayNameMap[display] = name
-    end
-
-    return validDisplayNames
-end
-
-local PlayerDropdown = MainTab:CreateDropdown({
-    Name = "Teleport to Player",
-    Options = GetWorkspacePlayers(),
-    Flag = "TeleportDropdown",
-    Callback = function(Selected)
-        local displayName = Selected[1]
-        local targetName = DisplayNameMap[displayName]
-        local targetModel = Workspace:FindFirstChild(targetName)
-        local localModel = Workspace:FindFirstChild(Players.LocalPlayer.Name)
-        if targetModel and targetModel:FindFirstChild("HumanoidRootPart") and localModel and localModel:FindFirstChild("HumanoidRootPart") then
-            localModel.HumanoidRootPart.CFrame = targetModel.HumanoidRootPart.CFrame * CFrame.new(0, 3, 0)
-        end
-    end
-})
-
 -- ===== AUTO STARS =====
 local function MoveStars()
     pcall(function()
@@ -118,6 +86,65 @@ MainTab:CreateButton({
     Callback = function()
         pcall(function()
             workspace.World.VIPWall:Destroy()
+        end)
+    end
+})
+-- ===== TELEPORT TAB =====
+local TeleportTab = Window:CreateTab("Teleport", "locate")
+
+-- ===== Teleport to Player (by DisplayName) =====
+local DisplayNameMap = {}
+
+local function GetWorkspacePlayers()
+    local validDisplayNames = {}
+    DisplayNameMap = {}
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        local name = player.Name
+        local display = player.DisplayName
+        table.insert(validDisplayNames, display)
+        DisplayNameMap[display] = name
+    end
+
+    return validDisplayNames
+end
+
+local PlayerDropdown = TeleportTab:CreateDropdown({
+    Name = "Teleport to Player",
+    Options = GetWorkspacePlayers(),
+    Flag = "TeleportDropdown",
+    Callback = function(Selected)
+        local displayName = Selected[1]
+        local targetName = DisplayNameMap[displayName]
+        local targetModel = Workspace:FindFirstChild(targetName)
+        local localModel = Workspace:FindFirstChild(Players.LocalPlayer.Name)
+        if targetModel and targetModel:FindFirstChild("HumanoidRootPart") and localModel and localModel:FindFirstChild("HumanoidRootPart") then
+            localModel.HumanoidRootPart.CFrame = targetModel.HumanoidRootPart.CFrame * CFrame.new(0, 3, 0)
+        end
+    end
+})
+
+-- Generate World Options
+local worldOptions = {}
+for i = 1, 38 do
+    table.insert(worldOptions, "World " .. i)
+end
+
+TeleportTab:CreateDropdown({
+    Name = "Teleport World",
+    Options = worldOptions,
+    Flag = "TeleportWorldDropdown",
+    Callback = function(selected)
+        local worldNumber = tostring(selected[1]:match("%d+"))
+        local args = { [1] = worldNumber }
+
+        pcall(function()
+            game:GetService("ReplicatedStorage")
+                :WaitForChild("Remote")
+                :WaitForChild("Teleport")
+                :WaitForChild("Server")
+                :WaitForChild("RequestTeleport")
+                :FireServer(unpack(args))
         end)
     end
 })
