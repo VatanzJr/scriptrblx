@@ -155,7 +155,7 @@ TestTab:CreateToggle({
         _G.SyncThrow = Value
         if Value then
             syncLoop = task.spawn(function()
-                local ThrowAreaPart = Workspace:WaitForChild("World"):WaitForChild("ThrowArea"):WaitForChild("DummyAreaCollision")
+                local ThrowAreaPart = Workspace:WaitForChild("World"):WaitForChild("ThrowArea"):WaitForChild("ThrowAreaNeonDecor")
                 local lastCFrame = nil
 
                 while _G.SyncThrow do
