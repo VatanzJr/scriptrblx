@@ -2,6 +2,7 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local Window = Rayfield:CreateWindow({
     Name = "Vatanz Hub",
@@ -104,21 +105,15 @@ ToolsTab:CreateButton({
     end,
 })
 
--- ===== TEST TAB (Auto Throw) =====
+-- ===== TEST TAB (Auto Throw & Sync ThrowArea) =====
 local TestTab = Window:CreateTab("Test", "flame")
 
--- ThrowArea position you provided
-local OriginalThrowCFrame = CFrame.new(
-    -95.644928, 3.56980205, -109.045753,
-    -1, 0, 0,
-    0, 1, 0,
-    0, 0, -1
-)
-
+-- Auto Throw (old logic, now optional)
+-- You can remove this if not needed anymore
 TestTab:CreateToggle({
-    Name = "Auto Throw (Teleport + Return)",
+    Name = "Auto Throw (Old)",
     CurrentValue = false,
-    Flag = "AutoThrowNew",
+    Flag = "AutoThrowOld",
     Callback = function(Value)
         _G.Loop = Value
         if Value then
@@ -127,31 +122,58 @@ TestTab:CreateToggle({
                     pcall(function()
                         local char = Workspace:FindFirstChild(Players.LocalPlayer.Name)
                         if char and char:FindFirstChild("HumanoidRootPart") then
-                            -- Save the current CFrame (position)
                             local hrp = char.HumanoidRootPart
                             local oldCFrame = hrp.CFrame
-
-                            -- Teleport to the ThrowArea (position you provided)
-                            hrp.CFrame = OriginalThrowCFrame
-                            task.wait(0.3)  -- Allow some time for teleportation
-
-                            -- Perform the throw action by firing the remote
                             local throwRemote = ReplicatedStorage:WaitForChild("Remote"):WaitForChild("Throw"):WaitForChild("Server"):WaitForChild("Request")
+                            hrp.CFrame = CFrame.new(-95.644928, 3.56980205, -109.045753)
+                            task.wait(0.3)
                             throwRemote:FireServer()
-
-                            task.wait(7)  -- Wait for the throw to complete
-
-                            -- Return to the original position after the throw
+                            task.wait(7)
                             hrp.CFrame = oldCFrame
                         end
                     end)
-                    task.wait(7)  -- Control the interval between throws
+                    task.wait(7)
                 end
             end)
         else
             if _G.throwLoop then
                 task.cancel(_G.throwLoop)
                 _G.throwLoop = nil
+            end
+        end
+    end
+})
+
+-- ===== Auto Sync ThrowArea to Player CFrame =====
+local syncLoop = nil
+
+TestTab:CreateToggle({
+    Name = "Auto Sync ThrowArea to Player",
+    CurrentValue = false,
+    Flag = "AutoSyncThrowArea",
+    Callback = function(Value)
+        _G.SyncThrow = Value
+        if Value then
+            syncLoop = task.spawn(function()
+                local ThrowAreaPart = Workspace:WaitForChild("World"):WaitForChild("ThrowArea"):WaitForChild("ThrowArea")
+                local lastCFrame = nil
+
+                while _G.SyncThrow do
+                    local char = Workspace:FindFirstChild(Players.LocalPlayer.Name)
+                    if char and char:FindFirstChild("HumanoidRootPart") then
+                        local hrp = char.HumanoidRootPart
+                        if not lastCFrame or (lastCFrame.Position - hrp.Position).Magnitude > 0.1 then
+                            ThrowAreaPart.CFrame = hrp.CFrame
+                            lastCFrame = hrp.CFrame
+                        end
+                    end
+                    task.wait(2)
+                end
+            end)
+        else
+            if syncLoop then
+                task.cancel(syncLoop)
+                syncLoop = nil
             end
         end
     end
@@ -175,5 +197,4 @@ Workspace.ChildRemoved:Connect(function(child)
     end
 end)
 
--- Initial setup
 UpdateList()
