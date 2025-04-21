@@ -5,7 +5,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Window = Rayfield:CreateWindow({
     Name = "Vatanz Hub",
-    LoadingTitle = "Multi-Feature Hub 00",
+    LoadingTitle = "Multi-Feature Hub 22",
     LoadingSubtitle = "by Vatanz",
     ConfigurationSaving = { Enabled = true, FileName = "VatanzHub" }
 })
@@ -86,24 +86,6 @@ task.defer(function()
     AutoStarsToggle:Set(true)
 end)
 
--- ===== TOOLS TAB =====
-local ToolsTab = Window:CreateTab("Tools", "settings")
-
-ToolsTab:CreateButton({
-    Name = "Open Dark Dex",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Babyhamsta/RBLX_Scripts/main/Universal/BypassedDarkDexV3.lua", true))()
-        Rayfield:Notify({ Title = "Success", Content = "Dark Dex loaded!", Duration = 3, Image = "check" })
-    end,
-})
-
-ToolsTab:CreateButton({
-    Name = "Simple Spy",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/exxtremestuffs/SimpleSpySource/master/SimpleSpy.lua", true))()
-    end,
-})
-
 -- ===== TEST TAB (Auto Throw) =====
 local TestTab = Window:CreateTab("Test", "flame")
 
@@ -127,38 +109,34 @@ TestTab:CreateToggle({
                         local char = Workspace:FindFirstChild(Players.LocalPlayer.Name)
                         if not char or not char:FindFirstChild("HumanoidRootPart") then return end
 
+                        -- Save the original position (Old CFrame)
                         local hrp = char.HumanoidRootPart
                         local oldCFrame = hrp.CFrame
 
-                        -- Teleport to ThrowArea
+                        -- Teleport to ThrowArea position
                         local throwArea = Workspace:FindFirstChild("World") and Workspace.World:FindFirstChild("ThrowArea")
                         if throwArea and throwArea:IsA("Part") then
-                            hrp.CFrame = throwArea.CFrame + Vector3.new(0, 3, 0) -- Slightly above the ThrowArea part
+                            hrp.CFrame = OriginalThrowCframe
                             task.wait(0.3)
 
-                            -- Fire Throw request
+                            -- Fire the throw
                             local throwRemote = ReplicatedStorage:WaitForChild("Remote"):WaitForChild("Throw"):WaitForChild("Server"):WaitForChild("Request")
                             throwRemote:FireServer()
 
-                            task.wait(2)  -- Wait for 2 seconds after throw
+                            -- Wait for the throw to complete
+                            task.wait(2)
 
-                            -- Return to original position
+                            -- Return to the old position
                             hrp.CFrame = oldCFrame
                         end
                     end)
-                    task.wait(2)
+                    task.wait(7) -- Wait before the next throw
                 end
             end)
         else
             if _G.throwLoop then
                 task.cancel(_G.throwLoop)
                 _G.throwLoop = nil
-            end
-
-            -- Reset ThrowArea
-            local throwArea = Workspace:FindFirstChild("World") and Workspace.World:FindFirstChild("ThrowArea")
-            if throwArea and throwArea:IsA("Part") then
-                throwArea.CFrame = OriginalThrowCFrame
             end
         end
     end
