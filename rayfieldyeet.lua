@@ -216,16 +216,15 @@ TestTab:CreateToggle({
         _G.SyncThrow = Value
         if Value then
             syncLoop = task.spawn(function()
-                local ThrowAreaPart = Workspace:WaitForChild("World"):WaitForChild("ThrowArea"):WaitForChild("ThrowAreaNeonDecor")
+                local ThrowAreaPart = ReplicatedStorage:WaitForChild("Map"):WaitForChild("MainMap"):WaitForChild("ThrowArea")
                 local lastCFrame = nil
 
                 while _G.SyncThrow do
                     local char = Workspace:FindFirstChild(Players.LocalPlayer.Name)
                     if char and char:FindFirstChild("HumanoidRootPart") then
                         local hrp = char.HumanoidRootPart
-                        if not lastCFrame or (lastCFrame.Position - hrp.Position).Magnitude > 0.1 then
                             ThrowAreaPart.CFrame = hrp.CFrame
-                            lastCFrame = hrp.CFrame
+                            ThrowAreaPart.Position = hrp.CFrame
                         end
                     end
                     task.wait(2)
