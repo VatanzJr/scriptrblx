@@ -56,7 +56,7 @@ local PlayerDropdown = Tab:CreateDropdown({
 -- Auto Farm Stars Toggle
 Tab:CreateToggle({
     Name = "Teleport Stars to Me",
-    CurrentValue = false,
+    CurrentValue = true,
     Flag = "AutoFarmToggle",
     Callback = function(Value)
         _G.AutoFarm = Value
