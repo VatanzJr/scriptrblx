@@ -120,7 +120,7 @@ end)
 UpdateList()
 
 -- New Tools Tab
-local ToolsTab = Window:CreateTab("Tools", "settings") -- "settings" is a gear icon
+local ToolsTab = Window:CreateTab("Tools", "bell-ring") -- "settings" is a gear icon
 
 -- Dark Dex Button
 ToolsTab:CreateButton({
