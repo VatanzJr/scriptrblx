@@ -19,15 +19,21 @@ MainTab:CreateButton({
     Callback = function() Rayfield:Destroy() end,
 })
 
--- Teleport to Player
+-- ===== Teleport to Player (by DisplayName) =====
+local DisplayNameMap = {}
+
 local function GetWorkspacePlayers()
-    local validPlayers = {}
-    for _, model in ipairs(Workspace:GetChildren()) do
-        if model:IsA("Model") and model:FindFirstChild("HumanoidRootPart") then
-            table.insert(validPlayers, model.Name)
-        end
+    local validDisplayNames = {}
+    DisplayNameMap = {}
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        local name = player.Name
+        local display = player.DisplayName
+        table.insert(validDisplayNames, display)
+        DisplayNameMap[display] = name
     end
-    return validPlayers
+
+    return validDisplayNames
 end
 
 local PlayerDropdown = MainTab:CreateDropdown({
@@ -35,7 +41,8 @@ local PlayerDropdown = MainTab:CreateDropdown({
     Options = GetWorkspacePlayers(),
     Flag = "TeleportDropdown",
     Callback = function(Selected)
-        local targetName = Selected[1]
+        local displayName = Selected[1]
+        local targetName = DisplayNameMap[displayName]
         local targetModel = Workspace:FindFirstChild(targetName)
         local localModel = Workspace:FindFirstChild(Players.LocalPlayer.Name)
         if targetModel and targetModel:FindFirstChild("HumanoidRootPart") and localModel and localModel:FindFirstChild("HumanoidRootPart") then
@@ -82,7 +89,6 @@ AutoStarsToggle = MainTab:CreateToggle({
     end
 })
 
--- Force toggle ON visually and functionally on script run
 task.defer(function()
     AutoStarsToggle:Set(true)
 end)
@@ -108,8 +114,6 @@ ToolsTab:CreateButton({
 -- ===== TEST TAB (Auto Throw & Sync ThrowArea) =====
 local TestTab = Window:CreateTab("Test", "flame")
 
--- Auto Throw (old logic, now optional)
--- You can remove this if not needed anymore
 TestTab:CreateToggle({
     Name = "Auto Throw (Old)",
     CurrentValue = false,
@@ -144,7 +148,7 @@ TestTab:CreateToggle({
     end
 })
 
--- ===== Auto Sync ThrowArea to Player CFrame =====
+-- Auto Sync ThrowArea
 local syncLoop = nil
 
 TestTab:CreateToggle({
