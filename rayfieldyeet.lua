@@ -100,7 +100,7 @@ ToolsTab:CreateButton({
 ToolsTab:CreateButton({
     Name = "Simple Spy",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/exxtremestuffs/SimpleSpySource/master/SimpleSpy.lua", true))()
+        loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/78n/SimpleSpy/main/SimpleSpyBeta.lua"))()
     end,
 })
 
