@@ -6,7 +6,7 @@ local Window = Rayfield:CreateWindow({
     Name = "Vatanz Hub",
     LoadingTitle = "Multi-Feature Hub",
     LoadingSubtitle = "by Vatanz",
-    ConfigurationSaving = { Enabled = true, FileName = "VatanzHub" }
+    ConfigurationSaving = { Enabled = false, FileName = "VatanzHub" }
 })
 
 local Tab = Window:CreateTab("Main", "bell-ring")
