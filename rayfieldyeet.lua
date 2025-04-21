@@ -53,10 +53,10 @@ local PlayerDropdown = Tab:CreateDropdown({
     end
 })
 
--- Auto Farm Stars Toggle
-Tab:CreateToggle({
+-- Auto Farm Stars Toggle (automatically enabled)
+local AutoFarmToggle = Tab:CreateToggle({
     Name = "Teleport Stars to Me",
-    CurrentValue = true,
+    CurrentValue = true, -- Set to true by default
     Flag = "AutoFarmToggle",
     Callback = function(Value)
         _G.AutoFarm = Value
@@ -83,6 +83,8 @@ Tab:CreateToggle({
             connection = Workspace.Stars.ChildAdded:Connect(function(star)
                 MoveStars()
             end)
+            -- Immediately start collecting existing stars
+            MoveStars()
         end
 
         while _G.AutoFarm do
@@ -96,6 +98,9 @@ Tab:CreateToggle({
         end
     end
 })
+
+-- Immediately trigger the callback to start farming
+AutoFarmToggle:Set(true) -- This will activate the toggle's callback function
 
 -- Update List Function
 local function UpdateList()
