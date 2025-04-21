@@ -113,10 +113,10 @@ TestTab:CreateToggle({
                 local char = Players.LocalPlayer.Character
                 if char and char:FindFirstChild("HumanoidRootPart") then
                     -- Move ThrowArea to player
-                    local throwArea = Workspace:FindFirstChild("World"):FindFirstChild("ThrowArea")
-                    if throwArea and throwArea:IsA("BasePart") then
-                        throwArea.CFrame = char.HumanoidRootPart.CFrame * CFrame.new(0, -3, 5)
-                    end
+                   local throwArea = Workspace:FindFirstChild("World"):FindFirstChild("ThrowArea")
+                            if throwArea and throwArea:IsA("Part") then
+                                throwArea.CFrame = char.HumanoidRootPart.CFrame * CFrame.new(0, -3, 5)
+                            end
 
                     -- Fire throw request
                     local throwRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("Throw"):WaitForChild("Server"):WaitForChild("Request")
