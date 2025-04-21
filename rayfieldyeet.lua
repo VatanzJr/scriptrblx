@@ -6,13 +6,14 @@ local Window = Rayfield:CreateWindow({
     Name = "Vatanz Hub",
     LoadingTitle = "Multi-Feature Hub",
     LoadingSubtitle = "by Vatanz",
-    ConfigurationSaving = { Enabled = false, FileName = "VatanzHub" }
+    ConfigurationSaving = { Enabled = true, FileName = "VatanzHub" }
 })
 
-local Tab = Window:CreateTab("Main", "bell-ring")
+-- Main Tab (Existing Features)
+local MainTab = Window:CreateTab("Main", "bell-ring")
 
 -- Destroy UI Button
-Tab:CreateButton({
+MainTab:CreateButton({
     Name = "Destroy UI",
     Callback = function() Rayfield:Destroy() end,
 })
@@ -31,7 +32,7 @@ local function GetWorkspacePlayers()
     return validPlayers
 end
 
-local PlayerDropdown = Tab:CreateDropdown({
+local PlayerDropdown = MainTab:CreateDropdown({
     Name = "Teleport to Player",
     Options = GetWorkspacePlayers(),
     Flag = "TeleportDropdown",
@@ -54,9 +55,9 @@ local PlayerDropdown = Tab:CreateDropdown({
 })
 
 -- Auto Farm Stars Toggle (automatically enabled)
-local AutoStarsToggle = Tab:CreateToggle({
+local AutoStarsToggle = MainTab:CreateToggle({
     Name = "Auto Stars",
-    CurrentValue = true, -- Set to true to auto-enable
+    CurrentValue = true,
     Flag = "AutoFarmToggle",
     Callback = function(Value)
         _G.AutoFarm = Value
@@ -83,7 +84,6 @@ local AutoStarsToggle = Tab:CreateToggle({
             connection = Workspace.Stars.ChildAdded:Connect(function(star)
                 MoveStars()
             end)
-            -- Immediately start collecting existing stars
             MoveStars()
         end
 
@@ -98,8 +98,6 @@ local AutoStarsToggle = Tab:CreateToggle({
         end
     end
 })
-
--- Immediately trigger the callback to start farming
 AutoStarsToggle:Set(true)
 
 -- Update List Function
@@ -119,5 +117,29 @@ Workspace.ChildRemoved:Connect(function(child)
         UpdateList()
     end
 end)
-
 UpdateList()
+
+-- New Tools Tab
+local ToolsTab = Window:CreateTab("Tools", "settings") -- "settings" is a gear icon
+
+-- Dark Dex Button
+ToolsTab:CreateButton({
+    Name = "Open Dark Dex",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Babyhamsta/RBLX_Scripts/main/Universal/BypassedDarkDexV3.lua", true))()
+        Rayfield:Notify({
+            Title = "Dark Dex Loaded",
+            Content = "Explorer opened successfully",
+            Duration = 3,
+            Image = "check"
+        })
+    end,
+})
+
+-- Optional: Add more tools here
+ToolsTab:CreateButton({
+    Name = "Simple Spy",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/exxtremestuffs/SimpleSpySource/master/SimpleSpy.lua", true))()
+    end,
+})
