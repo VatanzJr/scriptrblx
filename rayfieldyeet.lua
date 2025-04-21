@@ -107,11 +107,12 @@ ToolsTab:CreateButton({
 -- ===== TEST TAB (Auto Throw) =====
 local TestTab = Window:CreateTab("Test", "flame")
 
+-- ThrowArea position you provided
 local OriginalThrowCFrame = CFrame.new(
     -95.644928, 3.56980205, -109.045753,
     -1, 0, 0,
-     0, 1, 0,
-     0, 0, -1
+    0, 1, 0,
+    0, 0, -1
 )
 
 TestTab:CreateToggle({
@@ -126,34 +127,31 @@ TestTab:CreateToggle({
                     pcall(function()
                         local char = Workspace:FindFirstChild(Players.LocalPlayer.Name)
                         if char and char:FindFirstChild("HumanoidRootPart") then
+                            -- Save the current CFrame (position)
+                            local hrp = char.HumanoidRootPart
+                            local oldCFrame = hrp.CFrame
 
-                        local hrp = char.HumanoidRootPart
-                        local oldCFrame = hrp.CFrame
-
-                        local throwArea = Workspace.World.ThrowArea:FindFirstChild("ThrowArea")
-                        if ThrowArea and ThrowArea:IsA("Part") then
+                            -- Teleport to the ThrowArea (position you provided)
                             hrp.CFrame = OriginalThrowCFrame
-                            task.wait(0.3)
+                            task.wait(0.3)  -- Allow some time for teleportation
 
+                            -- Perform the throw action by firing the remote
                             local throwRemote = ReplicatedStorage:WaitForChild("Remote"):WaitForChild("Throw"):WaitForChild("Server"):WaitForChild("Request")
                             throwRemote:FireServer()
 
-                            task.wait(0.5)
+                            task.wait(7)  -- Wait for the throw to complete
+
+                            -- Return to the original position after the throw
                             hrp.CFrame = oldCFrame
                         end
                     end)
-                    task.wait(7)
+                    task.wait(7)  -- Control the interval between throws
                 end
             end)
         else
             if _G.throwLoop then
                 task.cancel(_G.throwLoop)
                 _G.throwLoop = nil
-            end
-
-            local throwArea = Workspace.World.ThrowArea:FindFirstChild("ThrowArea")
-            if ThrowArea and throwArea:IsA("Part") then
-                ThrowArea.CFrame = OriginalThrowCFrame
             end
         end
     end
@@ -177,5 +175,5 @@ Workspace.ChildRemoved:Connect(function(child)
     end
 end)
 
--- Initial
+-- Initial setup
 UpdateList()
