@@ -5,7 +5,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Window = Rayfield:CreateWindow({
     Name = "Vatanz Hub",
-    LoadingTitle = "Multi-Feature Hub 1",
+    LoadingTitle = "Multi-Feature Hub 00",
     LoadingSubtitle = "by Vatanz",
     ConfigurationSaving = { Enabled = true, FileName = "VatanzHub" }
 })
@@ -130,19 +130,23 @@ TestTab:CreateToggle({
                         local hrp = char.HumanoidRootPart
                         local oldCFrame = hrp.CFrame
 
+                        -- Teleport to ThrowArea
                         local throwArea = Workspace:FindFirstChild("World") and Workspace.World:FindFirstChild("ThrowArea")
                         if throwArea and throwArea:IsA("Part") then
-                            hrp.CFrame = throwArea.CFrame + Vector3.new(0, 3, 0)
+                            hrp.CFrame = throwArea.CFrame + Vector3.new(0, 3, 0) -- Slightly above the ThrowArea part
                             task.wait(0.3)
 
+                            -- Fire Throw request
                             local throwRemote = ReplicatedStorage:WaitForChild("Remote"):WaitForChild("Throw"):WaitForChild("Server"):WaitForChild("Request")
                             throwRemote:FireServer()
 
-                            task.wait(0.5)
+                            task.wait(2)  -- Wait for 2 seconds after throw
+
+                            -- Return to original position
                             hrp.CFrame = oldCFrame
                         end
                     end)
-                    task.wait(7)
+                    task.wait(2)
                 end
             end)
         else
@@ -151,6 +155,7 @@ TestTab:CreateToggle({
                 _G.throwLoop = nil
             end
 
+            -- Reset ThrowArea
             local throwArea = Workspace:FindFirstChild("World") and Workspace.World:FindFirstChild("ThrowArea")
             if throwArea and throwArea:IsA("Part") then
                 throwArea.CFrame = OriginalThrowCFrame
