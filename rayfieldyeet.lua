@@ -225,6 +225,7 @@ TestTab:CreateToggle({
                         local hrp = char.HumanoidRootPart
                             ThrowAreaPart.CFrame = hrp.CFrame
                             ThrowAreaPart.Position = hrp.CFrame
+                                lastCFrame = hrp.CFrame
                         end
                     end
                     task.wait(2)
