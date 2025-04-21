@@ -93,6 +93,36 @@ task.defer(function()
     AutoStarsToggle:Set(true)
 end)
 
+MainTab:CreateToggle({
+    Name = "Auto Spin Daily",
+    CurrentValue = false,
+    Flag = "AutoSpinDaily",
+    Callback = function(value)
+        _G.Loop = value
+        task.spawn(function()
+            while _G.Loop do
+                local args = {
+                    [1] = "DailyWheel"
+                }
+                pcall(function()
+                    game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("Player"):WaitForChild("Server"):WaitForChild("ClaimTimedReward"):InvokeServer(unpack(args))
+                end)
+                wait(5) -- wait time between spins to prevent flooding
+            end
+        end)
+    end
+})
+
+MainTab:CreateButton({
+    Name = "Unlock All Gamepass (soon)",
+    Callback = function()
+        pcall(function()
+            workspace.World.VIPWall:Destroy()
+        end)
+    end
+})
+
+
 -- ===== TOOLS TAB =====
 local ToolsTab = Window:CreateTab("Tools", "settings")
 
