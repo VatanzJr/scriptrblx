@@ -217,16 +217,11 @@ TestTab:CreateToggle({
         if Value then
             syncLoop = task.spawn(function()
                 local ThrowAreaPart = ReplicatedStorage:WaitForChild("Map"):WaitForChild("MainMap"):WaitForChild("ThrowArea")
-                local lastCFrame = nil
-
                 while _G.SyncThrow do
                     local char = Workspace:FindFirstChild(Players.LocalPlayer.Name)
                     if char and char:FindFirstChild("HumanoidRootPart") then
                         local hrp = char.HumanoidRootPart
-                            ThrowAreaPart.CFrame = hrp.CFrame
-                            ThrowAreaPart.Position = hrp.CFrame
-                                lastCFrame = hrp.CFrame
-                        end
+                        ThrowAreaPart.CFrame = hrp.CFrame -- sets position and rotation
                     end
                     task.wait(2)
                 end
@@ -239,6 +234,7 @@ TestTab:CreateToggle({
         end
     end
 })
+
 
 -- ===== AUTO-UPDATE PLAYER DROPDOWN =====
 local function UpdateList()
