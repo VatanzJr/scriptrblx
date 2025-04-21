@@ -91,12 +91,41 @@ ToolsTab:CreateButton({
     end,
 })
 
--- Simple Spy (Optional)
+-- Simple Spy Button
 ToolsTab:CreateButton({
     Name = "Simple Spy",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/exxtremestuffs/SimpleSpySource/master/SimpleSpy.lua", true))()
     end,
+})
+
+-- ===== TEST TAB =====
+local TestTab = Window:CreateTab("Test", "flame")
+
+TestTab:CreateToggle({
+    Name = "Auto Throw",
+    CurrentValue = false,
+    Flag = "AutoThrowToggle",
+    Callback = function(value)
+        _G.Loop = value
+        while _G.Loop do
+            pcall(function()
+                local char = Players.LocalPlayer.Character
+                if char and char:FindFirstChild("HumanoidRootPart") then
+                    -- Move ThrowArea to player
+                    local throwArea = Workspace:FindFirstChild("World"):FindFirstChild("ThrowArea")
+                    if throwArea and throwArea:IsA("BasePart") then
+                        throwArea.CFrame = char.HumanoidRootPart.CFrame * CFrame.new(0, -3, 5)
+                    end
+
+                    -- Fire throw request
+                    local throwRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("Throw"):WaitForChild("Server"):WaitForChild("Request")
+                    throwRemote:FireServer()
+                end
+            end)
+            task.wait(7)
+        end
+    end
 })
 
 -- ===== AUTO-UPDATES =====
