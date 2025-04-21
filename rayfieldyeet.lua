@@ -4,7 +4,7 @@ local Players = game:GetService("Players")
 
 local Window = Rayfield:CreateWindow({
     Name = "Vatanz Hub",
-    LoadingTitle = "Multi-Feature Hub 2",
+    LoadingTitle = "Multi-Feature Hub",
     LoadingSubtitle = "by Vatanz",
     ConfigurationSaving = { Enabled = true, FileName = "VatanzHub" }
 })
@@ -46,40 +46,38 @@ local PlayerDropdown = MainTab:CreateDropdown({
     end
 })
 
--- Auto Stars Toggle (Fixed)
-local AutoStarsToggle = MainTab:CreateToggle({
+-- Auto Stars Logic
+local function MoveStars()
+    pcall(function()
+        local char = Players.LocalPlayer.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            for _, star in ipairs(Workspace.Stars:GetChildren()) do
+                if star:IsA("Model") and star:FindFirstChild("Root") then
+                    star.Root.CFrame = char.HumanoidRootPart.CFrame
+                    game:GetService("ReplicatedStorage").Remote.Star.Server.Collect:FireServer(star.Name)
+                end
+            end
+        end
+    end)
+end
+
+MainTab:CreateToggle({
     Name = "Auto Stars",
     CurrentValue = false,
-    Flag = "AutoFarmToggle",
+    Flag = "AutoStarsToggle",
     Callback = function(Value)
         _G.AutoFarm = Value
-
         if Value then
-            _G.StarLoop = true
-
-            local function MoveStars()
-                pcall(function()
-                    local char = Players.LocalPlayer.Character
-                    if char and char:FindFirstChild("HumanoidRootPart") then
-                        for _, star in ipairs(Workspace.Stars:GetChildren()) do
-                            if star:IsA("Model") and star:FindFirstChild("Root") then
-                                star.Root.CFrame = char.HumanoidRootPart.CFrame
-                                game:GetService("ReplicatedStorage").Remote.Star.Server.Collect:FireServer(star.Name)
-                            end
-                        end
-                    end
-                end)
-            end
-
-            -- Initial grab
-            MoveStars()
-            _G.starConnection = Workspace.Stars.ChildAdded:Connect(MoveStars)
-
+            _G.starLoopThread = task.spawn(function()
+                while _G.AutoFarm do
+                    MoveStars()
+                    task.wait(2)
+                end
+            end)
         else
-            _G.StarLoop = false
-            if _G.starConnection then
-                _G.starConnection:Disconnect()
-                _G.starConnection = nil
+            if _G.starLoopThread then
+                task.cancel(_G.starLoopThread)
+                _G.starLoopThread = nil
             end
         end
     end
@@ -111,7 +109,6 @@ ToolsTab:CreateButton({
 -- ===== TEST TAB =====
 local TestTab = Window:CreateTab("Test", "flame")
 
--- Original ThrowArea CFrame
 local OriginalThrowCFrame = CFrame.new(
     -95.644928, 3.56980205, -109.045753,
     -1, 0, 0,
@@ -120,30 +117,43 @@ local OriginalThrowCFrame = CFrame.new(
 )
 
 TestTab:CreateToggle({
-    Name = "Auto Throw",
+    Name = "Auto Throw (Teleport + Return)",
     CurrentValue = false,
-    Flag = "AutoThrowToggle",
-    Callback = function(value)
-        _G.Loop = value
-        if value then
-            task.spawn(function()
+    Flag = "AutoThrowNew",
+    Callback = function(Value)
+        _G.Loop = Value
+        if Value then
+            _G.throwLoop = task.spawn(function()
                 while _G.Loop do
                     pcall(function()
                         local char = Players.LocalPlayer.Character
-                        if char and char:FindFirstChild("HumanoidRootPart") then
-                            local throwArea = Workspace:FindFirstChild("World"):FindFirstChild("ThrowArea")
-                            if throwArea and throwArea:IsA("Part") then
-                                throwArea.CFrame = char.HumanoidRootPart.CFrame * CFrame.new(0, -3, 5)
-                            end
+                        if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+
+                        local hrp = char.HumanoidRootPart
+                        local oldCFrame = hrp.CFrame
+
+                        local throwArea = Workspace:FindFirstChild("World"):FindFirstChild("ThrowArea")
+                        if throwArea and throwArea:IsA("Part") then
+                            hrp.CFrame = throwArea.CFrame + Vector3.new(0, 3, 0)
+                            task.wait(0.3)
 
                             local throwRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("Throw"):WaitForChild("Server"):WaitForChild("Request")
                             throwRemote:FireServer()
+
+                            task.wait(0.5)
+                            hrp.CFrame = oldCFrame
                         end
                     end)
                     task.wait(7)
                 end
             end)
         else
+            if _G.throwLoop then
+                task.cancel(_G.throwLoop)
+                _G.throwLoop = nil
+            end
+
+            -- Reset ThrowArea
             local throwArea = Workspace:FindFirstChild("World"):FindFirstChild("ThrowArea")
             if throwArea and throwArea:IsA("Part") then
                 throwArea.CFrame = OriginalThrowCFrame
