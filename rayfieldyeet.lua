@@ -90,31 +90,6 @@ MainTab:CreateButton({
     end
 })
 
-TestTab:CreateToggle({
-    Name = "Auto Sync EggBasketHitbox to Player",
-    CurrentValue = false,
-    Flag = "SyncEggBasketHitbox",
-    Callback = function(Value)
-        _G.SyncBasket = Value
-        if Value then
-            _G.basketLoop = task.spawn(function()
-                while _G.SyncBasket do
-                    local char = Workspace:FindFirstChild(Players.LocalPlayer.Name)
-                    local basket = Workspace:FindFirstChild("EggBasketHitbox")
-                    if char and char:FindFirstChild("HumanoidRootPart") and basket and basket:IsA("BasePart") then
-                        basket.CFrame = char.HumanoidRootPart.CFrame
-                    end
-                    task.wait(1)
-                end
-            end)
-        else
-            if _G.basketLoop then
-                task.cancel(_G.basketLoop)
-                _G.basketLoop = nil
-            end
-        end
-    end
-})
 
 -- ===== TELEPORT TAB =====
 local TeleportTab = Window:CreateTab("Teleport", "locate")
@@ -262,6 +237,32 @@ TestTab:CreateToggle({
             if syncLoop then
                 task.cancel(syncLoop)
                 syncLoop = nil
+            end
+        end
+    end
+})
+
+TestTab:CreateToggle({
+    Name = "Auto Sync EggBasketHitbox to Player",
+    CurrentValue = false,
+    Flag = "SyncEggBasketHitbox",
+    Callback = function(Value)
+        _G.SyncBasket = Value
+        if Value then
+            _G.basketLoop = task.spawn(function()
+                while _G.SyncBasket do
+                    local char = Workspace:FindFirstChild(Players.LocalPlayer.Name)
+                    local basket = Workspace:FindFirstChild("EggBasketHitbox")
+                    if char and char:FindFirstChild("HumanoidRootPart") and basket and basket:IsA("BasePart") then
+                        basket.CFrame = char.HumanoidRootPart.CFrame
+                    end
+                    task.wait(1)
+                end
+            end)
+        else
+            if _G.basketLoop then
+                task.cancel(_G.basketLoop)
+                _G.basketLoop = nil
             end
         end
     end
