@@ -127,7 +127,7 @@ MainTab:CreateToggle({
     end
 })
 
-MainTab:CreateButton({
+MainTab:CreateToggle({
     Name = "Auto Use Best Equip",
     Callback = function()
         pcall(function()
@@ -431,7 +431,7 @@ EggsTab:CreateToggle({
     end
 })
 
-MainTab:CreateButton({
+EggsTab:CreateToggle({
     Name = "Auto Craft All Pet",
     Callback = function()
         pcall(function()
