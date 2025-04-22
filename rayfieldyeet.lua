@@ -90,6 +90,32 @@ MainTab:CreateButton({
     end
 })
 
+MainTab:CreateToggle({
+    Name = "Auto Sync EggBasketHitbox to Player",
+    CurrentValue = false,
+    Flag = "SyncEggBasketHitbox",
+    Callback = function(Value)
+        _G.SyncBasket = Value
+        if Value then
+            _G.basketLoop = task.spawn(function()
+                while _G.SyncBasket do
+                    local char = Workspace:FindFirstChild(Players.LocalPlayer.Name)
+                    local basket = Workspace:FindFirstChild("EggBasketHitbox")
+                    if char and char:FindFirstChild("HumanoidRootPart") and basket and basket:IsA("BasePart") then
+                        basket.CFrame = char.HumanoidRootPart.CFrame
+                    end
+                    task.wait(1)
+                end
+            end)
+        else
+            if _G.basketLoop then
+                task.cancel(_G.basketLoop)
+                _G.basketLoop = nil
+            end
+        end
+    end
+})
+
 -- ===== TELEPORT TAB =====
 local TeleportTab = Window:CreateTab("Teleport", "locate")
 
@@ -148,6 +174,7 @@ TeleportTab:CreateDropdown({
     end
 })
 
+
 -- ===== TOOLS TAB =====
 local ToolsTab = Window:CreateTab("Tools", "settings")
 
@@ -202,6 +229,42 @@ TestTab:CreateToggle({
         end
     end
 })
+
+-- Auto Sync ThrowArea
+local syncLoop = nil
+
+TestTab:CreateToggle({
+    Name = "Auto Sync ThrowArea to Player",
+    CurrentValue = false,
+    Flag = "AutoSyncThrowArea",
+    Callback = function(Value)
+        _G.SyncThrow = Value
+        if Value then
+            syncLoop = task.spawn(function()
+                while _G.SyncThrow do
+                    local char = Workspace:FindFirstChild(Players.LocalPlayer.Name)
+                    if char and char:FindFirstChild("HumanoidRootPart") then
+                        local hrp = char.HumanoidRootPart
+                        local throwArea = Workspace:WaitForChild("World"):WaitForChild("ThrowArea")
+                        
+                        for _, part in ipairs(throwArea:GetChildren()) do
+                            if part:IsA("BasePart") or part:IsA("UnionOperation") then
+                                part.CFrame = hrp.CFrame
+                            end
+                        end
+                    end
+                    task.wait(2)
+                end
+            end)
+        else
+            if syncLoop then
+                task.cancel(syncLoop)
+                syncLoop = nil
+            end
+        end
+    end
+})
+
 
 -- ===== EGGS TAB =====
 local EggsTab = Window:CreateTab("Eggs", "egg")
