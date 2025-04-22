@@ -13,7 +13,8 @@ local Window = Rayfield:CreateWindow({
 
 -- ===== MAIN TAB =====
 local MainTab = Window:CreateTab("Main", "locate")
-
+local Divider = Tab:CreateDivider()
+Divider:Set(false)
 MainTab:CreateButton({
     Name = "Destroy UI",
     Callback = function() Rayfield:Destroy() end,
