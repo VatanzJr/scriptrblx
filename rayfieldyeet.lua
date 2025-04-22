@@ -127,6 +127,34 @@ MainTab:CreateToggle({
     end
 })
 
+MainTab:CreateButton({
+    Name = "Auto Use Best Equip",
+    Callback = function()
+        pcall(function()
+            local remote = ReplicatedStorage:WaitForChild("Remote")
+                :WaitForChild("Pet")
+                :WaitForChild("Server")
+                :WaitForChild("EquipBest")
+            
+            remote:FireServer()
+        end)
+    end,
+})
+
+MainTab:CreateButton({
+    Name = "Auto Craft All Pet",
+    Callback = function()
+        pcall(function()
+            local remote = ReplicatedStorage:WaitForChild("Remote")
+                :WaitForChild("Pet")
+                :WaitForChild("Server")
+                :WaitForChild("CraftAll")
+            
+            remote:FireServer()
+        end)
+    end,
+})
+
 -- ===== TELEPORT TAB =====
 
 local DisplayNameMap = {}
