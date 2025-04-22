@@ -415,7 +415,7 @@ EggsTab:CreateToggle({
                                 :WaitForChild("Purchase")
                                 :InvokeServer(unpack(args))
                         end)
-                        task.wait(5)
+                        task.wait(0.5)
                     else
                         Rayfield:Notify({ Title = "Error", Content = "No egg selected!", Duration = 3, Image = "error" })
                         task.wait(2)
