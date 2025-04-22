@@ -13,7 +13,17 @@ local Window = Rayfield:CreateWindow({
 
 -- ===== MAIN TAB =====
 local MainTab = Window:CreateTab("Main", "locate")
-local Divider = MainTab:CreateDivider()
+local TeleportTab = Window:CreateTab("Teleport", "locate")
+local ToolsTab = Window:CreateTab("Tools", "settings")
+local TestTab = Window:CreateTab("Test", "flame")
+local EggsTab = Window:CreateTab("Eggs", "egg")
+
+-- Create dividers for each tab
+local MainDivider = MainTab:CreateDivider()
+local TeleportDivider = TeleportTab:CreateDivider()
+local ToolsDivider = ToolsTab:CreateDivider()
+local TestDivider = TestTab:CreateDivider()
+local EggsDivider = EggsTab:CreateDivider()
 
 MainTab:CreateButton({
     Name = "Destroy UI",
@@ -118,7 +128,6 @@ MainTab:CreateToggle({
 })
 
 -- ===== TELEPORT TAB =====
-local TeleportTab = Window:CreateTab("Teleport", "locate")
 
 local DisplayNameMap = {}
 
@@ -177,7 +186,6 @@ TeleportTab:CreateDropdown({
 
 
 -- ===== TOOLS TAB =====
-local ToolsTab = Window:CreateTab("Tools", "settings")
 
 ToolsTab:CreateButton({
     Name = "Open Dark Dex",
@@ -195,7 +203,7 @@ ToolsTab:CreateButton({
 })
 
 -- ===== TEST TAB =====
-local TestTab = Window:CreateTab("Test", "flame")
+
 
 TestTab:CreateToggle({
     Name = "Auto Throw (Old)",
@@ -268,7 +276,7 @@ TestTab:CreateToggle({
 
 
 -- ===== EGGS TAB =====
-local EggsTab = Window:CreateTab("Eggs", "egg")
+
 
 local eggOptions = {
     {Name = "World 1 - Forest Egg", Id = "1"},
