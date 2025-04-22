@@ -6,14 +6,14 @@ local RunService = game:GetService("RunService")
 
 local Window = Rayfield:CreateWindow({
     Name = "Vatanz Hub",
-    LoadingTitle = "Multi-Feature Hub12",
+    LoadingTitle = "Multi-Feature Hub122",
     LoadingSubtitle = "by Vatanz",
     ConfigurationSaving = { Enabled = true, FileName = "VatanzHub" }
 })
 
 -- ===== MAIN TAB =====
 local MainTab = Window:CreateTab("Main", "locate")
-local Divider = Tab:CreateDivider()
+local Divider = MainTab:CreateDivider()
 Divider:Set(false)
 MainTab:CreateButton({
     Name = "Destroy UI",
