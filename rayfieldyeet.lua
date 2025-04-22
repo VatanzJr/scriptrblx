@@ -141,19 +141,6 @@ MainTab:CreateButton({
     end,
 })
 
-MainTab:CreateButton({
-    Name = "Auto Craft All Pet",
-    Callback = function()
-        pcall(function()
-            local remote = ReplicatedStorage:WaitForChild("Remote")
-                :WaitForChild("Pet")
-                :WaitForChild("Server")
-                :WaitForChild("CraftAll")
-            
-            remote:FireServer()
-        end)
-    end,
-})
 
 -- ===== TELEPORT TAB =====
 
@@ -442,6 +429,20 @@ EggsTab:CreateToggle({
             end
         end
     end
+})
+
+MainTab:CreateButton({
+    Name = "Auto Craft All Pet",
+    Callback = function()
+        pcall(function()
+            local remote = ReplicatedStorage:WaitForChild("Remote")
+                :WaitForChild("Pet")
+                :WaitForChild("Server")
+                :WaitForChild("CraftAll")
+            
+            remote:FireServer()
+        end)
+    end,
 })
 
 -- ===== AUTO-UPDATE PLAYER DROPDOWN =====
