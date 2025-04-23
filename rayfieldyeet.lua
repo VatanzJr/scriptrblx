@@ -397,6 +397,7 @@ TestTab:CreateToggle({
 })
 
 -- ===== AUTO HIGH SCORE BYPASS =====
+-- ===== AUTO HIGH SCORE BYPASS =====
 TestTab:CreateToggle({
     Name = "Auto High Score (Bypass)",
     CurrentValue = false,
@@ -419,7 +420,7 @@ TestTab:CreateToggle({
                             )
                         end
 
-                        -- Initiate throw
+                        -- Trigger throw
                         ReplicatedStorage:WaitForChild("Remote"):WaitForChild("Throw"):WaitForChild("Server"):WaitForChild("Request"):FireServer()
                         
                         -- Wait for throw sequence
@@ -427,7 +428,7 @@ TestTab:CreateToggle({
 
                         -- Position spoof sequence
                         local raceRemote = ReplicatedStorage:WaitForChild("Remote"):WaitForChild("Race"):WaitForChild("Server"):WaitForChild("RequestPositionUpdate")
-                        local positions = {
+                        local positionUpdates = {
                             {Vector2int16.new(9, 3), Vector3int16.new(14361, -31745, -32109)},
                             {Vector2int16.new(25, 4), Vector3int16.new(14361, -31745, -32109)},
                             {Vector2int16.new(49, 5), Vector3int16.new(14361, -31745, -32109)},
@@ -438,16 +439,20 @@ TestTab:CreateToggle({
                             {Vector2int16.new(249, 10), Vector3int16.new(14361, -31745, -32109)}
                         }
 
-                        for _, posData in ipairs(positions) do
-                            raceRemote:FireServer({posData})
+                        -- Send position updates
+                        for _, updateData in ipairs(positionUpdates) do
+                            pcall(function()
+                                local args = { updateData }
+                                raceRemote:FireServer(unpack(args))
+                            end)
                             task.wait(0.5)
                         end
 
                         -- Finalize throw
-                        local landedArgs = {os.time(), 5.425}  -- Using current timestamp
+                        local landedArgs = {os.time(), 5.425}  -- Dynamic timestamp
                         ReplicatedStorage:WaitForChild("Remote"):WaitForChild("Throw"):WaitForChild("Server"):WaitForChild("Landed"):InvokeServer(unpack(landedArgs))
                     end)
-                    task.wait(10) -- Cooldown between cycles
+                    task.wait(1) -- Cooldown between cycles
                 end
             end)
         else
