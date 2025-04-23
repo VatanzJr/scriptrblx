@@ -365,7 +365,7 @@ TestTab:CreateToggle({
                         -- Teleport to throw position
                         local player = Players.LocalPlayer
                         if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                            player.Character.HumanoidRootPart.CFrame = CFrame.new(-94.4807968, 281.926392, -110.089729, -0.0431109145, 4.41078996e-08, -0.999070287, 2.23052012e-08, 1, 4.31864535e-08, 0.999070287, -2.04226573e-08, -0.0431109145)
+                            player.Character.HumanoidRootPart.CFrame = CFrame.new(-96.0029755, 9.22552109, -109.720993, -0.2586658, -6.79654999e-09, -0.96596688, -3.78689857e-10, 1, -6.93460223e-09, 0.96596688, -1.42794254e-09, -0.2586658)
                         end
                         
                         task.wait(0.1)
