@@ -6,7 +6,7 @@ local RunService = game:GetService("RunService")
 
 local Window = Rayfield:CreateWindow({
     Name = "Vatanz Hub",
-    LoadingTitle = "Multi-Feature Hub11",
+    LoadingTitle = "Multi-Feature Hub12",
     LoadingSubtitle = "by Vatanz",
     ConfigurationSaving = { Enabled = true, FileName = "VatanzHub" }
 })
@@ -431,17 +431,33 @@ EggsTab:CreateToggle({
 })
 
 EggsTab:CreateToggle({
-    Name = "Auto Craft All Pet",
-    Callback = function()
-        pcall(function()
-            local remote = ReplicatedStorage:WaitForChild("Remote")
-                :WaitForChild("Pet")
-                :WaitForChild("Server")
-                :WaitForChild("CraftAll")
-            
-            remote:FireServer()
-        end)
-    end,
+    Name = "Auto Craft All Pets",
+    CurrentValue = false,
+    Flag = "AutoCraftAllPets",
+    Callback = function(Value)
+        _G.AutoCraftAll = Value
+        if Value then
+            _G.craftLoop = task.spawn(function()
+                while _G.AutoCraftAll do
+                    pcall(function()
+                        local remote = ReplicatedStorage:WaitForChild("Remote")
+                            :WaitForChild("Pet")
+                            :WaitForChild("Server")
+                            :WaitForChild("CraftAll")
+                        
+                        remote:FireServer()
+                        task.wait(1) -- Small delay to prevent spamming
+                    end)
+                    task.wait(5) -- Adjust delay between crafts (e.g., 5 seconds)
+                end
+            end)
+        else
+            if _G.craftLoop then
+                task.cancel(_G.craftLoop)
+                _G.craftLoop = nil
+            end
+        end
+    end
 })
 
 -- ===== AUTO-UPDATE PLAYER DROPDOWN =====
