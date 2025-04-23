@@ -396,6 +396,69 @@ TestTab:CreateToggle({
     end
 })
 
+-- ===== AUTO HIGH SCORE BYPASS =====
+TestTab:CreateToggle({
+    Name = "Auto High Score (Bypass)",
+    CurrentValue = false,
+    Flag = "AutoHighScoreBypass",
+    Callback = function(Value)
+        _G.HighScoreBypass = Value
+        if Value then
+            _G.bypassThread = task.spawn(function()
+                while _G.HighScoreBypass do
+                    pcall(function()
+                        -- Teleport to throw position
+                        local player = Players.LocalPlayer
+                        local character = workspace:FindFirstChild(player.Name)
+                        if character and character:FindFirstChild("HumanoidRootPart") then
+                            character.HumanoidRootPart.CFrame = CFrame.new(
+                                -94.4807968, 281.926392, -110.089729, 
+                                -0.0431109145, 4.41078996e-08, -0.999070287, 
+                                2.23052012e-08, 1, 4.31864535e-08, 
+                                0.999070287, -2.04226573e-08, -0.0431109145
+                            )
+                        end
+
+                        -- Initiate throw
+                        ReplicatedStorage:WaitForChild("Remote"):WaitForChild("Throw"):WaitForChild("Server"):WaitForChild("Request"):FireServer()
+                        
+                        -- Wait for throw sequence
+                        task.wait(5)
+
+                        -- Position spoof sequence
+                        local raceRemote = ReplicatedStorage:WaitForChild("Remote"):WaitForChild("Race"):WaitForChild("Server"):WaitForChild("RequestPositionUpdate")
+                        local positions = {
+                            {Vector2int16.new(9, 3), Vector3int16.new(14361, -31745, -32109)},
+                            {Vector2int16.new(25, 4), Vector3int16.new(14361, -31745, -32109)},
+                            {Vector2int16.new(49, 5), Vector3int16.new(14361, -31745, -32109)},
+                            {Vector2int16.new(74, 6), Vector3int16.new(14361, -31745, -32109)},
+                            {Vector2int16.new(99, 7), Vector3int16.new(14361, -31745, -32109)},
+                            {Vector2int16.new(149, 7), Vector3int16.new(14361, -31745, -32109)},
+                            {Vector2int16.new(199, 9), Vector3int16.new(14361, -31745, -32109)},
+                            {Vector2int16.new(249, 10), Vector3int16.new(14361, -31745, -32109)}
+                        }
+
+                        for _, posData in ipairs(positions) do
+                            raceRemote:FireServer({posData})
+                            task.wait(0.5)
+                        end
+
+                        -- Finalize throw
+                        local landedArgs = {os.time(), 5.425}  -- Using current timestamp
+                        ReplicatedStorage:WaitForChild("Remote"):WaitForChild("Throw"):WaitForChild("Server"):WaitForChild("Landed"):InvokeServer(unpack(landedArgs))
+                    end)
+                    task.wait(10) -- Cooldown between cycles
+                end
+            end)
+        else
+            if _G.bypassThread then
+                task.cancel(_G.bypassThread)
+                _G.bypassThread = nil
+            end
+        end
+    end
+})
+
 -- ===== EGGS TAB =====
 
 
