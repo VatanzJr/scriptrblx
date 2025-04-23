@@ -351,6 +351,50 @@ TestTab:CreateToggle({
     end
 })
 
+-- ===== AUTO HIGH SCORE =====
+TestTab:CreateToggle({
+    Name = "Auto Get High Score",
+    CurrentValue = false,
+    Flag = "AutoHighScoreToggle",
+    Callback = function(Value)
+        _G.HighScoreLoop = Value
+        if Value then
+            _G.highScoreThread = task.spawn(function()
+                while _G.HighScoreLoop do
+                    pcall(function()
+                        -- Teleport to throw position
+                        local player = Players.LocalPlayer
+                        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                            player.Character.HumanoidRootPart.CFrame = CFrame.new(-94.4807968, 281.926392, -110.089729, -0.0431109145, 4.41078996e-08, -0.999070287, 2.23052012e-08, 1, 4.31864535e-08, 0.999070287, -2.04226573e-08, -0.0431109145)
+                        end
+                        
+                        task.wait(0.1)
+                        
+                        -- Trigger throw
+                        ReplicatedStorage:WaitForChild("Remote"):WaitForChild("Throw"):WaitForChild("Server"):WaitForChild("Request"):FireServer()
+                        
+                        task.wait(1)
+                        
+                        -- Teleport to landing position
+                        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                            player.Character.HumanoidRootPart.CFrame = CFrame.new(9667.20312, 194.237198, -107.84156, -0.000386250351, 0.187470704, -0.982270122, 1.00458779e-08, 0.982270181, 0.187470719, 0.99999994, 7.24007623e-05, -0.000379404082)
+                        end
+                        
+                        task.wait(7)
+                        
+                        -- Complete the throw
+                        ReplicatedStorage:WaitForChild("Remote"):WaitForChild("Throw"):WaitForChild("Server"):WaitForChild("Landed"):InvokeServer()
+                    end)
+                end
+            end)
+        else
+            if _G.highScoreThread then
+                task.cancel(_G.highScoreThread)
+                _G.highScoreThread = nil
+            end
+        end
+    end
+})
 
 -- ===== EGGS TAB =====
 
