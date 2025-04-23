@@ -141,6 +141,68 @@ MainTab:CreateToggle({
     end,
 })
 
+MainTab:CreateButton({
+    Name = "Redeem All Codes",
+    Callback = function()
+        local codes = {
+            "FREEPOWER",
+            "FREESTARS",
+            "YEETCARTOON",
+            "STARSHOPPER",
+            "COLLECTOR",
+            "DIMENSION",
+            "DIMENSIONBOOST",
+            "TELEPORTER",
+            "EASYEET",
+            "ENCHANTED",
+            "GLACIER",
+            "AFK",
+            "MAGIC",
+            "JUNK",
+            "AZTEC",
+            "REAP",
+            "CHRISTMAS",
+            "GIFTING",
+            "HAPPY2024",
+            "HALLOWEEN",
+            "XMAS24",
+            "IPLAYEVERYDAY",
+            "ILOVEYEETING",
+            "OLYMP",
+            "VALENTINE",
+            "SUPERCAR",
+            "GYMSTAR"
+        }
+
+        Rayfield:Notify({
+            Title = "Code Redemption",
+            Content = "Starting to redeem all codes...",
+            Duration = 3,
+            Image = "info"
+        })
+
+        for _, code in pairs(codes) do
+            pcall(function()
+                local args = {[1] = code}
+                game:GetService("ReplicatedStorage")
+                    :WaitForChild("Remote")
+                    :WaitForChild("Player")
+                    :WaitForChild("Server")
+                    :WaitForChild("RedeemCode")
+                    :InvokeServer(unpack(args))
+                task.wait(0.2)
+            end)
+        end
+
+        Rayfield:Notify({
+            Title = "Code Redemption Complete",
+            Content = "Attempted to redeem all codes!",
+            Duration = 5,
+            Image = "check"
+        })
+    end
+})
+
 
 -- ===== TELEPORT TAB =====
 
