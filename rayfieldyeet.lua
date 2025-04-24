@@ -6,7 +6,7 @@ local RunService = game:GetService("RunService")
 
 local Window = Rayfield:CreateWindow({
     Name = "Vatanz Hub",
-    LoadingTitle = "Multi-Feature Hub12",
+    LoadingTitle = "Multi-Feature Hub ok",
     LoadingSubtitle = "by Vatanz",
     ConfigurationSaving = { Enabled = true, FileName = "VatanzHub" }
 })
@@ -56,7 +56,6 @@ AutoStarsToggle = MainTab:CreateToggle({
             _G.starLoopThread = task.spawn(function()
                 while _G.AutoFarm do
                     MoveStars()
-                    task.wait(2)
                 end
             end)
         else
