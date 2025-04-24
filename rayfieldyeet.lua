@@ -56,6 +56,7 @@ AutoStarsToggle = MainTab:CreateToggle({
             _G.starLoopThread = task.spawn(function()
                 while _G.AutoFarm do
                     MoveStars()
+                            wait(0.5)
                 end
             end)
         else
