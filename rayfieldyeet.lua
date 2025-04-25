@@ -633,6 +633,39 @@ EggsTab:CreateToggle({
     end
 })
 
+-- ===== EVENTS TAB =====
+local EventsTab = Window:CreateTab("Events", "present")  -- Create new tab
+local EventsDivider = EventsTab:CreateDivider()
+
+EventsTab:CreateToggle({
+    Name = "Auto Click Present",
+    CurrentValue = false,
+    Flag = "AutoPresentToggle",
+    Callback = function(Value)
+        _G.AutoClickPresent = Value
+        if Value then
+            _G.presentLoop = task.spawn(function()
+                while _G.AutoClickPresent do
+                    pcall(function()
+                        local args = {{
+                            Id = "a8c17245-59b7-456f-ac3c-10ae512f1ceb"
+                        }}
+                        game:GetService("ReplicatedStorage"):WaitForChild("EasterEvent"):WaitForChild("PresentRemote"):FireServer(unpack(args))
+                    end)
+                    task.wait(1)  -- Adjust delay between clicks (1 second)
+                end
+            end)
+        else
+            if _G.presentLoop then
+                task.cancel(_G.presentLoop)
+                _G.presentLoop = nil
+            end
+        end
+    end
+})
+
+EventsTab:CreateLabel("Automatically collects Easter event presents")
+
 -- ===== AUTO-UPDATE PLAYER DROPDOWN =====
 -- Create update loop
 task.spawn(function()
