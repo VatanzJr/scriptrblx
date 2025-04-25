@@ -211,14 +211,14 @@ local DisplayNameMap = {}
 local function GetWorkspacePlayers()
     local validDisplayNames = {}
     DisplayNameMap = {}
-
+    
+    -- Get all players from Players service
     for _, player in ipairs(Players:GetPlayers()) do
-        local name = player.Name
-        local display = player.DisplayName
-        table.insert(validDisplayNames, display)
-        DisplayNameMap[display] = name
+        local displayName = player.DisplayName
+        table.insert(validDisplayNames, displayName)
+        DisplayNameMap[displayName] = player.Name
     end
-
+    
     return validDisplayNames
 end
 
@@ -639,17 +639,14 @@ local function UpdateList()
     PlayerDropdown:SetOptions(GetWorkspacePlayers())
 end
 
-Workspace.ChildAdded:Connect(function(child)
-    if child:IsA("Model") and child:FindFirstChild("HumanoidRootPart") then
-        task.wait(0.5)
-        UpdateList()
-    end
+-- Track player joins/leaves using Players service
+Players.PlayerAdded:Connect(function(player)
+    UpdateList()
 end)
 
-Workspace.ChildRemoved:Connect(function(child)
-    if child:IsA("Model") then
-        UpdateList()
-    end
+Players.PlayerRemoving:Connect(function(player)
+    UpdateList()
 end)
 
+-- Initial population
 UpdateList()
