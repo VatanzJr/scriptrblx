@@ -633,11 +633,7 @@ EggsTab:CreateToggle({
     end
 })
 
--- ===== EVENTS TAB =====
-local EventsTab = Window:CreateTab("Events", "present")  -- Create new tab
-local EventsDivider = EventsTab:CreateDivider()
-
-EventsTab:CreateToggle({
+MainTab:CreateToggle({
     Name = "Auto Click Present",
     CurrentValue = false,
     Flag = "AutoPresentToggle",
@@ -664,7 +660,7 @@ EventsTab:CreateToggle({
     end
 })
 
-EventsTab:CreateLabel("Automatically collects Easter event presents")
+MainTab:CreateLabel("Automatically collects Easter event presents")
 
 -- ===== AUTO-UPDATE PLAYER DROPDOWN =====
 -- Create update loop
