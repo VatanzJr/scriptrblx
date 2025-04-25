@@ -205,7 +205,6 @@ MainTab:CreateButton({
 
 
 -- ===== TELEPORT TAB =====
-
 local DisplayNameMap = {}
 
 local function GetWorkspacePlayers()
@@ -635,18 +634,17 @@ EggsTab:CreateToggle({
 })
 
 -- ===== AUTO-UPDATE PLAYER DROPDOWN =====
-local function UpdateList()
-    PlayerDropdown:SetOptions(GetWorkspacePlayers())
-end
-
--- Track player joins/leaves using Players service
-Players.PlayerAdded:Connect(function(player)
-    UpdateList()
+-- Create update loop
+task.spawn(function()
+    while task.wait(10) do  -- Update every 10 seconds
+        PlayerDropdown:SetOptions(GetWorkspacePlayers())
+        
+        -- Optional notification for testing
+        Rayfield:Notify({
+            Title = "Player List Updated",
+            Content = "Refreshed teleport targets",
+            Duration = 1,
+            Image = "refresh"
+        })
+    end
 end)
-
-Players.PlayerRemoving:Connect(function(player)
-    UpdateList()
-end)
-
--- Initial population
-UpdateList()
