@@ -664,7 +664,7 @@ MainTab:CreateToggle({
                         }}
                         game:GetService("ReplicatedStorage"):WaitForChild("EasterEvent"):WaitForChild("PresentRemote"):FireServer(unpack(args))
                     end)
-                    task.wait(0.2)  -- Adjust delay between clicks (1 second)
+                    task.wait(0.1)  -- Adjust delay between clicks (1 second)
                 end
             end)
         else
