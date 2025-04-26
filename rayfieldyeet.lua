@@ -206,45 +206,118 @@ MainTab:CreateButton({
 
 -- ===== TELEPORT TAB =====
 
+local Players = game:GetService("Players")
 local DisplayNameMap = {}
+local refreshDebounce = false  -- Prevent spamming refreshes
 
+-- Improved player fetcher with sorting and local player exclusion
 local function GetWorkspacePlayers()
     local validDisplayNames = {}
     DisplayNameMap = {}
     
-    -- Get all players from Players service
     for _, player in ipairs(Players:GetPlayers()) do
-        local displayName = player.DisplayName
-        table.insert(validDisplayNames, displayName)
-        DisplayNameMap[displayName] = player.Name
+        -- Skip local player and invalid instances
+        if player ~= Players.LocalPlayer and player:IsA("Player") then
+            local displayName = player.DisplayName
+            local username = player.Name
+            
+            -- Handle duplicate display names
+            local uniqueKey = displayName
+            if DisplayNameMap[displayName] then
+                uniqueKey = string.format("%s (@%s)", displayName, username)
+            end
+            
+            table.insert(validDisplayNames, uniqueKey)
+            DisplayNameMap[uniqueKey] = {
+                username = username,
+                player = player
+            }
+        end
     end
     
+    table.sort(validDisplayNames)
     return validDisplayNames
 end
 
+-- Create dropdown with improved error handling
 local PlayerDropdown = TeleportTab:CreateDropdown({
     Name = "Teleport to Player",
     Options = GetWorkspacePlayers(),
     Flag = "TeleportDropdown",
     Callback = function(Selected)
-        local displayName = Selected[1]
-        local targetName = DisplayNameMap[displayName]
-        local targetModel = Workspace:FindFirstChild(targetName)
-        local localModel = Workspace:FindFirstChild(Players.LocalPlayer.Name)
-        if targetModel and targetModel:FindFirstChild("HumanoidRootPart") and localModel and localModel:FindFirstChild("HumanoidRootPart") then
-            localModel.HumanoidRootPart.CFrame = targetModel.HumanoidRootPart.CFrame * CFrame.new(0, 3, 0)
+        local selectedKey = Selected[1]
+        local targetData = DisplayNameMap[selectedKey]
+        
+        if not targetData then
+            warn("Invalid player selection")
+            return
+        end
+        
+        local localPlayer = Players.LocalPlayer
+        local targetPlayer = targetData.player
+        
+        -- Wait for characters to load
+        local success = pcall(function()
+            local targetCharacter = targetPlayer.Character or targetPlayer.CharacterAdded:Wait()
+            local localCharacter = localPlayer.Character or localPlayer.CharacterAdded:Wait()
+            
+            if targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart") then
+                local offset = CFrame.new(0, 3, 0)
+                localCharacter.HumanoidRootPart.CFrame = targetCharacter.HumanoidRootPart.CFrame * offset
+            else
+                error("Target character missing HumanoidRootPart")
+            end
+        end)
+        
+        if not success then
+            -- Show error notification (if using Rayfield notifications)
+            Rayfield:Notify({
+                Title = "Teleport Failed",
+                Content = "Could not reach player character",
+                Duration = 3,
+                Image = 4483362458
+            })
         end
     end
 })
 
-Players.PlayerAdded:Connect(function()
-    PlayerDropdown:UpdateOptions(GetWorkspacePlayers())
+-- Safe refresh function with debounce
+local function SafeRefresh()
+    if refreshDebounce then return end
+    refreshDebounce = true
+    
+    local success, err = pcall(function()
+        PlayerDropdown:UpdateOptions(GetWorkspacePlayers())
+    end)
+    
+    if not success then
+        warn("Refresh failed:", err)
+        -- Optional: Show error notification
+    end
+    
+    refreshDebounce = false
+end
+
+-- Improved player tracking with delays
+Players.PlayerAdded:Connect(function(player)
+    task.wait(0.5)  -- Wait for player data to initialize
+    SafeRefresh()
+    
+    -- Setup character tracking for new players
+    player.CharacterAdded:Connect(function()
+        task.wait(0.2)  -- Wait for character to fully load
+        SafeRefresh()
+    end)
 end)
 
 Players.PlayerRemoving:Connect(function()
-    PlayerDropdown:UpdateOptions(GetWorkspacePlayers())
+    task.wait(0.1)  -- Allow removal to complete
+    SafeRefresh()
 end)
 
+-- Initial refresh after 2 seconds to ensure all players loaded
+task.wait(2)
+SafeRefresh()
 
 
 
