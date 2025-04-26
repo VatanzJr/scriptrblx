@@ -6,7 +6,7 @@ local RunService = game:GetService("RunService")
 
 local Window = Rayfield:CreateWindow({
     Name = "Vatanz Hub",
-    LoadingTitle = "Multi-Feature Hub oke112",
+    LoadingTitle = "Multi-Feature Hub oke1",
     LoadingSubtitle = "by Vatanz",
     ConfigurationSaving = { Enabled = true, FileName = "VatanzHub" }
 })
@@ -239,7 +239,7 @@ local PlayerDropdown = TeleportTab:CreateDropdown({
 -- Manual Refresh Button
 TeleportTab:CreateButton({
     Name = "Refresh Player List",
-    Callback = GetWorkspacePlayers
+    Callback = GetWorkspacePlayers()
 })
 
 
