@@ -237,14 +237,14 @@ local PlayerDropdown = TeleportTab:CreateDropdown({
     end
 })
 
--- Manual Refresh Button
-TeleportTab:CreateButton({
-    Name = "Refresh Player List",
-    Callback = function()
-        -- Update dropdown options with fresh player list
-        PlayerDropdown:SetOptions(GetWorkspacePlayers())
-    end
-})
+Players.PlayerAdded:Connect(function()
+    PlayerDropdown:UpdateOptions(GetWorkspacePlayers())
+end)
+
+Players.PlayerRemoving:Connect(function()
+    PlayerDropdown:UpdateOptions(GetWorkspacePlayers())
+end)
+
 
 
 
