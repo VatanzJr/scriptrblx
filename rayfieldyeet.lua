@@ -661,7 +661,7 @@ MainTab:CreateToggle({
                 while _G.AutoClickPresent do
                     pcall(function()
                         local args = {{
-                            Id = "a8c17245-59b7-456f-ac3c-10ae512f1ceb"
+                            Id = "ee00b2c7-537e-4495-ab11-e2343cbae110"
                         }}
                         game:GetService("ReplicatedStorage"):WaitForChild("EasterEvent"):WaitForChild("PresentRemote"):FireServer(unpack(args))
                     end)
