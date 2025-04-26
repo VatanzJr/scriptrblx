@@ -206,60 +206,39 @@ MainTab:CreateButton({
 
 -- ===== TELEPORT TAB =====
 
+-- ===== TELEPORT TAB =====
 local DisplayNameMap = {}
-local lastPlayerIds = {}
+local lastPlayerList = {}
 
 local function GetWorkspacePlayers()
     local validDisplayNames = {}
     DisplayNameMap = {}
-    local currentPlayerIds = {}
-
+    
     -- Get all players except local player
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= Players.LocalPlayer then
-            currentPlayerIds[#currentPlayerIds + 1] = player.UserId
+            local displayName = player.DisplayName
+            local username = player.Name
             
             -- Handle duplicate display names
-            local displayName = player.DisplayName
             local uniqueKey = displayName
-            
             if DisplayNameMap[displayName] then
-                uniqueKey = string.format("%s (@%s)", displayName, player.Name)
+                uniqueKey = string.format("%s (@%s)", displayName, username)
             end
 
-            validDisplayNames[#validDisplayNames + 1] = uniqueKey
+            table.insert(validDisplayNames, uniqueKey)
             DisplayNameMap[uniqueKey] = {
                 UserId = player.UserId,
-                UserName = player.Name,
+                UserName = username,
                 PlayerObject = player
             }
         end
     end
-
-    return validDisplayNames, currentPlayerIds
-end
-
-local function RefreshDropdown()
-    local newOptions, currentIds = GetWorkspacePlayers()
     
-    -- Only update if player list changed
-    if #currentIds ~= #lastPlayerIds then
-        PlayerDropdown:UpdateOptions(newOptions)
-        lastPlayerIds = currentIds
-        return
-    end
-
-    -- Check for any differences in player IDs
-    for _, id in ipairs(currentIds) do
-        if not table.find(lastPlayerIds, id) then
-            PlayerDropdown:UpdateOptions(newOptions)
-            lastPlayerIds = currentIds
-            return
-        end
-    end
+    table.sort(validDisplayNames)
+    return validDisplayNames
 end
 
--- ===== DROPDOWN CREATION =====
 local PlayerDropdown = TeleportTab:CreateDropdown({
     Name = "Teleport to Player",
     Options = GetWorkspacePlayers(),
@@ -279,21 +258,43 @@ local PlayerDropdown = TeleportTab:CreateDropdown({
     end
 })
 
--- ===== AUTO-REFRESH SYSTEM =====
-task.spawn(function()
-    while true do
-        pcall(RefreshDropdown) -- Safe refresh with error handling
-        task.wait(10) -- Check every 10 seconds
-    end
-end)
-
--- ===== MANUAL REFRESH BUTTON =====
+-- Fixed manual refresh button
 TeleportTab:CreateButton({
     Name = "Refresh Player List Now",
     Callback = function()
-        PlayerDropdown:UpdateOptions(GetWorkspacePlayers())
+        pcall(function()
+            PlayerDropdown:UpdateOptions(GetWorkspacePlayers())
+            Rayfield:Notify({
+                Title = "Player List Updated",
+                Content = "Successfully refreshed player list",
+                Duration = 2,
+                Image = "check"
+            })
+        end)
     end
 })
+
+-- Auto-refresh system
+task.spawn(function()
+    while true do
+        pcall(function()
+            -- Get current player IDs
+            local currentPlayers = {}
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player ~= Players.LocalPlayer then
+                    table.insert(currentPlayers, player.UserId)
+                end
+            end
+            
+            -- Only refresh if player list changed
+            if table.concat(currentPlayers) ~= table.concat(lastPlayerList) then
+                PlayerDropdown:UpdateOptions(GetWorkspacePlayers())
+                lastPlayerList = currentPlayers
+            end
+        end)
+        task.wait(10)
+    end
+end)
 
 
 
