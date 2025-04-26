@@ -6,7 +6,7 @@ local RunService = game:GetService("RunService")
 
 local Window = Rayfield:CreateWindow({
     Name = "Vatanz Hub",
-    LoadingTitle = "Multi-Feature Hub oke1",
+    LoadingTitle = "Multi-Feature Hub oke11",
     LoadingSubtitle = "by Vatanz",
     ConfigurationSaving = { Enabled = true, FileName = "VatanzHub" }
 })
@@ -207,29 +207,20 @@ MainTab:CreateButton({
 -- ===== TELEPORT TAB =====
 local DisplayNameMap = {}
 
--- Function to update player list
-local function UpdatePlayerDropdown()
+local function GetWorkspacePlayers()
     local validDisplayNames = {}
     DisplayNameMap = {}
     
+    -- Get all players from Players service
     for _, player in ipairs(Players:GetPlayers()) do
         local displayName = player.DisplayName
         table.insert(validDisplayNames, displayName)
         DisplayNameMap[displayName] = player.Name
     end
     
-    PlayerDropdown:SetOptions(validDisplayNames)
-    
-    -- Optional notification (you can remove this if unwanted)
-    Rayfield:Notify({
-        Title = "Player List Updated",
-        Content = "Refreshed teleport targets",
-        Duration = 1,
-        Image = "refresh"
-    })
+    return validDisplayNames
 end
 
--- Create initial dropdown
 local PlayerDropdown = TeleportTab:CreateDropdown({
     Name = "Teleport to Player",
     Options = GetWorkspacePlayers(),
@@ -244,21 +235,22 @@ local PlayerDropdown = TeleportTab:CreateDropdown({
         end
     end
 })
-
--- Add refresh button
-TeleportTab:CreateButton({
-    Name = "Refresh Player List",
-    Callback = function()
-        UpdatePlayerDropdown()
-    end
-})
-
--- Auto-refresh loop
+-- Create update loop
 task.spawn(function()
-    while task.wait(10) do
-        UpdatePlayerDropdown()
+    while task.wait(10) do  -- Update every 10 seconds
+        PlayerDropdown:SetOptions(GetWorkspacePlayers())
+        
+        -- Optional notification for testing
+        Rayfield:Notify({
+            Title = "Player List Updated",
+            Content = "Refreshed teleport targets",
+            Duration = 1,
+            Image = "refresh"
+        })
     end
 end)
+
+
 
 
 local worldOptions = {}
