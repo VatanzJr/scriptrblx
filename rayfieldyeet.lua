@@ -254,7 +254,17 @@ local PlayerDropdown = TeleportTab:CreateDropdown({
     Options = GetWorkspacePlayers(),
     Flag = "TeleportDropdown",
     Callback = function(Selected)
-        -- Keep your original teleport logic
+ local selectedKey = Selected[1]
+        local targetData = DisplayNameMap[selectedKey]
+        
+        if targetData and targetData.PlayerObject.Character then
+            local targetChar = targetData.PlayerObject.Character
+            local localChar = Players.LocalPlayer.Character
+            
+            if targetChar:FindFirstChild("HumanoidRootPart") and localChar:FindFirstChild("HumanoidRootPart") then
+                localChar.HumanoidRootPart.CFrame = targetChar.HumanoidRootPart.CFrame * CFrame.new(0, 3, 0)
+            end
+        end
     end
 })
 
