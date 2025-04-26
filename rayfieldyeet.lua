@@ -1,4 +1,4 @@
-ocal Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/VatanzJr/scriptrblx/refs/heads/main/ui.lua'))()
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/VatanzJr/scriptrblx/refs/heads/main/ui.lua'))()
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -6,7 +6,7 @@ local RunService = game:GetService("RunService")
 
 local Window = Rayfield:CreateWindow({
     Name = "Vatanz Hub",
-    LoadingTitle = "Multi-Feature Hub oke11",
+    LoadingTitle = "Multi-Feature Hub oke",
     LoadingSubtitle = "by Vatanz",
     ConfigurationSaving = { Enabled = true, FileName = "VatanzHub" }
 })
