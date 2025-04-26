@@ -679,4 +679,9 @@ MainTab:CreateToggle({
 
 MainTab:CreateLabel("Automatically collects Easter event presents")
 
--- ===== AUTO-UPDATE PLAYER DROPDOWN =====
+-- Auto-refresh loop
+task.spawn(function()
+    while task.wait(10) do
+        UpdatePlayerDropdown()
+    end
+end)
