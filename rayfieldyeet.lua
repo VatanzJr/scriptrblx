@@ -694,3 +694,4 @@ MainTab:CreateLabel("Automatically collects Easter event presents")
 
 -- ===== AUTO-UPDATE PLAYER DROPDOWN =====
 
+UpdatePlayerDropdown()
