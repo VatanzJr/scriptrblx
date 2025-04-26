@@ -93,7 +93,7 @@ MainTab:CreateToggle({
 })
 
 MainTab:CreateButton({
-    Name = "Unlock All Gamepass (soon)",
+    Name = "Unlock All Gamepass",
     Callback = function()
         pcall(function()
             workspace.World.VIPWall:Destroy()
@@ -207,20 +207,29 @@ MainTab:CreateButton({
 -- ===== TELEPORT TAB =====
 local DisplayNameMap = {}
 
-local function GetWorkspacePlayers()
+-- Function to update player list
+local function UpdatePlayerDropdown()
     local validDisplayNames = {}
     DisplayNameMap = {}
     
-    -- Get all players from Players service
     for _, player in ipairs(Players:GetPlayers()) do
         local displayName = player.DisplayName
         table.insert(validDisplayNames, displayName)
         DisplayNameMap[displayName] = player.Name
     end
     
-    return validDisplayNames
+    PlayerDropdown:SetOptions(validDisplayNames)
+    
+    -- Optional notification (you can remove this if unwanted)
+    Rayfield:Notify({
+        Title = "Player List Updated",
+        Content = "Refreshed teleport targets",
+        Duration = 1,
+        Image = "refresh"
+    })
 end
 
+-- Create initial dropdown
 local PlayerDropdown = TeleportTab:CreateDropdown({
     Name = "Teleport to Player",
     Options = GetWorkspacePlayers(),
@@ -235,21 +244,21 @@ local PlayerDropdown = TeleportTab:CreateDropdown({
         end
     end
 })
--- Create update loop
+
+-- Add refresh button
+TeleportTab:CreateButton({
+    Name = "Refresh Player List",
+    Callback = function()
+        UpdatePlayerDropdown()
+    end
+})
+
+-- Auto-refresh loop
 task.spawn(function()
-    while task.wait(10) do  -- Update every 10 seconds
-        PlayerDropdown:SetOptions(GetWorkspacePlayers())
-        
-        -- Optional notification for testing
-        Rayfield:Notify({
-            Title = "Player List Updated",
-            Content = "Refreshed teleport targets",
-            Duration = 1,
-            Image = "refresh"
-        })
+    while task.wait(10) do
+        UpdatePlayerDropdown()
     end
 end)
-
 
 
 local worldOptions = {}
