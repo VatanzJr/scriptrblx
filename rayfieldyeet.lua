@@ -677,8 +677,3 @@ MainTab:CreateToggle({
 MainTab:CreateLabel("Automatically collects Easter event presents")
 
 -- Auto-refresh loop
-task.spawn(function()
-    while task.wait(10) do
-        GetWorkspacePlayers()
-    end
-end)
