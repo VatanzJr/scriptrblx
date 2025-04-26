@@ -235,6 +235,22 @@ local PlayerDropdown = TeleportTab:CreateDropdown({
         end
     end
 })
+-- Create update loop
+task.spawn(function()
+    while task.wait(10) do  -- Update every 10 seconds
+        PlayerDropdown:SetOptions(GetWorkspacePlayers())
+        
+        -- Optional notification for testing
+        Rayfield:Notify({
+            Title = "Player List Updated",
+            Content = "Refreshed teleport targets",
+            Duration = 1,
+            Image = "refresh"
+        })
+    end
+end)
+
+
 
 local worldOptions = {}
 for i = 1, 38 do
@@ -663,17 +679,4 @@ MainTab:CreateToggle({
 MainTab:CreateLabel("Automatically collects Easter event presents")
 
 -- ===== AUTO-UPDATE PLAYER DROPDOWN =====
--- Create update loop
-task.spawn(function()
-    while task.wait(10) do  -- Update every 10 seconds
-        PlayerDropdown:SetOptions(GetWorkspacePlayers())
-        
-        -- Optional notification for testing
-        Rayfield:Notify({
-            Title = "Player List Updated",
-            Content = "Refreshed teleport targets",
-            Duration = 1,
-            Image = "refresh"
-        })
-    end
-end)
+
