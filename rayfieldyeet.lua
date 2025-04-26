@@ -6,7 +6,7 @@ local RunService = game:GetService("RunService")
 
 local Window = Rayfield:CreateWindow({
     Name = "Vatanz Hub",
-    LoadingTitle = "Multi-Feature Hub oke2",
+    LoadingTitle = "Multi-Feature Hub oke232",
     LoadingSubtitle = "by Vatanz",
     ConfigurationSaving = { Enabled = true, FileName = "VatanzHub" }
 })
