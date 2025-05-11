@@ -738,5 +738,27 @@ MainTab:CreateToggle({
 })
 
 MainTab:CreateLabel("Automatically collects Easter event presents")
+TestTab:CreateButton({
+    Name = "Instant Level Up",
+    Callback = function()
+        pcall(function()
+            game:GetService("ReplicatedStorage")
+                :WaitForChild("Packages")
+                :WaitForChild("Knit")
+                :WaitForChild("Services")
+                :WaitForChild("LevelService")
+                :WaitForChild("RF")
+                :WaitForChild("RequestLevelUp")
+                :InvokeServer()
+            
+            Rayfield:Notify({
+                Title = "Level Up Requested",
+                Content = "Successfully called LevelService!",
+                Duration = 3,
+                Image = "check"
+            })
+        end)
+    end
+})
 
 -- Auto-refresh loop
